@@ -1,0 +1,80 @@
+ELD Progress Report Data Shape Analysis - DETAILED
+
+The public/eld.json file contains an array with a single object that has a "FULL_JSON" property.
+Total students: 6803 (based on student_dcid count)
+
+Structure:
+[
+  {
+    "FULL_JSON": {
+      "data": [
+        {
+          "student_dcid": "42318",
+          "student_number": 2034095,
+          "first_name": "Fizz",
+          "last_name": "Tester", 
+          "grade_level": 4,
+          "home_room": "15",
+          "response": {
+            "id": "34798535",
+            "submitted_at": "2026-02-27T09:14:14Z",
+            "fields": [
+              {
+                "key": null,
+                "title": "Marking Period 2" | "Marking Period 1" | metadata_titles,
+                "container_title": "Skill description" | null,
+                "value": assessment_values | text_comments | dates | null
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+]
+
+FIELD TITLES (frequency analysis):
+- "Marking Period 1": 5,261 occurrences  
+- "Marking Period 2": 4,719 occurrences
+- Metadata titles (197 each):
+  - "Test"
+  - "Student" 
+  - "School"
+  - "Proficiency Level"
+  - "Performance Indicators"
+  - "ELD Teacher"
+  - "Date"
+  - "Current English Proficiency Level"
+
+CONTAINER TITLES (top skill areas - 394 each for behavioral skills):
+- "Transitions efficiently"
+- "Participates in group activities" 
+- "Follows two-step directions"
+- "Follows classroom expectations"
+- "Demonstrates enthusiasm in learning"
+
+Academic skills (314 each):
+- "Writes words and phrases"
+- "Writes complete sentences"
+- "Uses some basic words and simple phrases"
+- "Uses decoding skills to sound out words"
+- "Uses correct punctuation and grammar"
+
+ASSESSMENT VALUES:
+- "✓" (meets): 4,613 occurrences
+- "●" (approaching): 425 occurrences  
+- "/" (below): 1,694 occurrences
+- "+" (other/exceeds): 2,683 occurrences
+
+OTHER VALUES:
+- Text comments (teacher narratives for marking periods)
+- Dates (various assessment/entry dates)
+- Proficiency levels (e.g., "3.4 Developing", "4.4 Expanding")
+- Teacher names (e.g., "Ms. Putnam/ Ms. Hess")
+
+KEY OBSERVATIONS:
+- Each student has ~50+ assessment fields
+- Mix of behavioral and academic skill assessments
+- Two marking periods per skill area
+- Additional metadata fields for proficiency tracking
+- Some fields are form structure (null titles/containers) vs actual assessments

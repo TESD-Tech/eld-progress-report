@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ELD Progress Report</title>
+  ~[wc:commonscripts]
+  <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+</head>
+<body>
+  ~[wc:teachers_header_css]
+  <a href="/teachers/home.html" target="_top">Start Page</a> &gt; ELD Progress Report
+
+  <eld-dashboard portal="teachers"></eld-dashboard>
+
+  <script type="module">
+    const isDev = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+    const path = isDev ? '/src/Dashboard.svelte' : '/eld-progress-report/dashboard.js?v=~(random16)'
+    import(path).catch(e => console.error('ELD load failed:', e))
+  </script>
+
+  ~[wc:teachers_footer_css]
+</body>
+</html>

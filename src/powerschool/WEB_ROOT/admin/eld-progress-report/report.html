@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ELD Progress Report</title>
+  ~[wc:commonscripts]
+  <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+</head>
+<body>
+  ~[wc:admin_header_css]
+  <a href="/admin/home.html" target="_top">Start Page</a> &gt;
+  <a href="/admin/eld-progress-report/dashboard.html">ELD Progress Report</a> &gt;
+  Student Report
+
+  <eld-report portal="admin"></eld-report>
+
+  <script type="module">
+    const isDev = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+    const path = isDev ? '/src/Report.svelte' : '/eld-progress-report/report.js?v=~(random16)'
+    import(path).catch(e => console.error('ELD load failed:', e))
+  </script>
+
+  ~[wc:admin_footer_css]
+</body>
+</html>

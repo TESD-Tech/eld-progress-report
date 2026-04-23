@@ -1,0 +1,54 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+docs/.vuepress/dist/
+*.local
+
+# VuePress build and cache
+docs/.vuepress/dist/
+docs/.vuepress/.cache/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+
+# VuePress temp files
+docs/.vuepress/.temp/
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Test coverage reports
+coverage/
+# Temporary prompt files
+NEXT_PROMPT.md
+.aider*
+
+# Local development/testing data files
+public/log.json
+public/mentees.json
+public/eld.json
+data/
+.env.development
+.env.local
+.env
+
+# Exclude any test/sample data with real names or IDs
+**/sample-*.json
+**/test-*.json
+
+# Hermes agent working files
+.hermes/

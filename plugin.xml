@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<plugin version="26.04.02" xmlns="http://plugin.powerschool.pearson.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://plugin.powerschool.pearson.com plugin.xsd" name="TE Tech - ELD Progress Report" description="">
+  <publisher name="Benjamin Kemp">
+    <contact email="kempb@tesd.net"/>
+  </publisher>
+  
+  <!-- CDN Access for lit-html -->
+  <access_request>
+    <webservice url="https://unpkg.com/lit-html@3/index.js" description="lit-html templating library"/>
+    <webservice url="https://unpkg.com/lit-html@3/directives/repeat.js" description="lit-html repeat directive"/>
+  </access_request>
+</plugin>
