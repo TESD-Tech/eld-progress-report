@@ -1,17 +1,16 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ELD Progress Report — Dev</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
   <style>
-    body { margin: 0; background: #f5f5f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { margin: 0; padding: 0; background: #f5f5f5; }
   </style>
 </head>
 <body>
-  <!-- Dev entry point: Vite rewrites /src/Dashboard.svelte → /{base}/src/Dashboard.svelte -->
-  <!-- To test the report page, navigate to the portal HTML directly with ?student_dcid=XXXXX -->
-  <eld-dashboard portal="admin"></eld-dashboard>
-  <script type="module" src="/src/Dashboard.svelte"></script>
+  <eld-progress-report-app portal="admin"></eld-progress-report-app>
+  <script type="module" src="/src/main.ts"></script>
 </body>
 </html>

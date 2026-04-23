@@ -5,15 +5,27 @@
   import { parseStudentDcid, formatName, formatDate, calculateProgress, getMetadataFields } from '$lib/utils'
   import { printReport } from '$lib/printUtils'
   import AssessmentGrid from './components/AssessmentGrid.svelte'
-  import DevToolbar from './components/DevToolbar.svelte'
+  import DebugBar from './components/DebugBar.svelte'
 
-  let { portal = 'admin' } = $props<{ portal?: string }>()
+  let { portal = 'admin', student_dcid = '', onNavigate } = $props<{ 
+    portal?: string
+    student_dcid?: string
+    onNavigate?: (view: string, params?: Record<string, string>) => void 
+  }>()
 
   let student = $state<Student | null>(null)
   let students = $state<Student[]>([])
   let loading = $state(true)
   let error = $state<string | null>(null)
-  let dcid = $state<string>('')
+
+  function handleDashboardClick(event: Event) {
+    // If we have SPA navigation, use it instead of href navigation
+    if (onNavigate) {
+      event.preventDefault()
+      onNavigate('dashboard')
+    }
+    // Otherwise, let the href handle navigation (fallback)
+  }
 
   function dashboardHref() {
     const devPrefix = import.meta.env.DEV ? '/src/powerschool/WEB_ROOT' : ''
@@ -23,16 +35,15 @@
   }
 
   onMount(async () => {
-    dcid = parseStudentDcid() ?? ''
-    if (!dcid) {
-      error = 'No student_dcid provided in URL'
+    if (!student_dcid) {
+      error = 'No student_dcid provided'
       loading = false
       return
     }
     try {
       students = await loadStudents()
-      student = students.find(s => s.student_dcid === dcid) ?? null
-      if (!student) error = `Student ${dcid} not found`
+      student = students.find(s => s.student_dcid === student_dcid) ?? null
+      if (!student) error = `Student ${student_dcid} not found`
     } catch (e) {
       error = e instanceof Error ? e.message : 'Failed to load data'
     } finally {
@@ -44,7 +55,7 @@
 <div class="eld">
   {#if portal !== 'guardian'}
     <div class="breadcrumb">
-      <a href={dashboardHref()}>← Back to Dashboard</a>
+      <a href={dashboardHref()} onclick={handleDashboardClick}>← Back to Dashboard</a>
     </div>
   {/if}
 
@@ -94,7 +105,7 @@
 </div>
 
 {#if import.meta.env.DEV}
-  <DevToolbar currentPortal={portal} currentPage="report" {students} currentDcid={dcid} />
+  <DebugBar />
 {/if}
 
 <style>

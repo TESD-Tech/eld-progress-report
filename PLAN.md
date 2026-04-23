@@ -79,6 +79,39 @@ busting on every page load — so teachers always get the latest version after a
 
 ---
 
+## Navigation, BASE_URL, and Multipage Link Patterns
+
+### TL;DR (Intern Quickstart Cheat Sheet)
+- **Never hardcode dev-only paths** (like `/src/...`); use relative entrypoint links everywhere.
+- **Centralize navigation**: Use a helper (see `src/lib/utils/linkHelpers.ts` in this repo) to generate all inter-page links. Pass query params as needed.
+- **Always use `import.meta.env.BASE_URL`** as your root for static entrypoints. Vite injects this (e.g. `/eld-progress-report/`) in both dev and prod.
+
+#### Example for a "View Report" link:
+```ts
+import { reportUrl } from '$lib/utils/linkHelpers'
+// ...
+<a href={reportUrl(student_dcid)}>View Report</a>
+```
+
+#### Example for print page in JS:
+```ts
+import { printUrl } from '$lib/utils/linkHelpers'
+window.open(printUrl(), '_blank')
+```
+
+- **Vite config must always set** `base: '/your-plugin-name/'` — BASE_URL gets injected accordingly in all code.
+- If any page must reload or navigate, always use the centralized helper for consistency.
+- All top-level `report.html`, `dashboard.html`, etc are always at BASE_URL root in dev and prod. Make sure they're copied (or symlinked) in both modes.
+- If you do need context (admin/teacher/guardian), add a param to the helper and build the URL accordingly.
+
+### Why This? (Lessons learned from tesd-field-trips and here)
+- Old pattern of linking directly to `/src/` in dev is brittle and will break on build and when Vite structure changes.
+- BASE_URL-aware helpers give perfect parity between dev and production, no code branching required for navigation.
+- See `src/lib/utils/environment.ts` for centralized dev/prod/context detection—never use `import.meta.env.DEV` in more than one place! It also gives you the base path, host, and other meta fields.
+- All team members and future interns should just call one link-building function and forget the rest.
+
+---
+
 ## Project Layout
 
 ```
@@ -266,6 +299,237 @@ Upload the ZIP in PowerSchool: System > System Settings > Plugin Management Conf
 
 ---
 
+## Dev Toolbar / Dev Panel Patterns
+
+### Purpose
+The dev toolbar is a floating modal in the lower left that lets you rapidly switch between contexts (admin, teacher, guardian), render dashboard/report as any user, and pick a current student to simulate navigation.
+
+### Key features
+- Portal (admin/teacher/guardian) and page (dashboard/report) selectors
+- Student picker with search, to rapidly load a particular student's report
+- A single "Go" button triggers the navigation
+- Can be collapsed to keep out of the way when not needed
+
+### Navigation implementation
+- The toolbar should call the same centralized helpers as the rest of the app for navigation—never hardcode `/src/` or any context path directly!
+- Example:
+```ts
+import { reportUrl, dashboardUrl } from '$lib/utils/linkHelpers'
+location.href = page === 'report' ? reportUrl(selectedDcid) : dashboardUrl()
+```
+- Update the dev toolbar to use the real link helpers—so it always builds production-correct links in both dev and prod.
+
+### Adapt for new apps
+- Copy the pattern, but always route all navigation through project-standard link helpers.
+- Give yourself a toggle (`import.meta.env.DEV`) so the toolbar hides/renders only in dev mode—not in production.
+
+---
+
+## Testing Strategy
+
+### Overview
+PowerSchool plugins require robust testing due to their dual environment nature (dev + production) and complex path/URL handling. This plugin uses **Vitest** for comprehensive testing that catches the most common deployment issues before they reach production.
+
+### Test Framework
+- **Vitest** (chosen over Jest for better Vite integration)
+- **@testing-library/svelte** for component testing
+- **@testing-library/jest-dom** for DOM assertions
+- **happy-dom** as jsdom alternative
+
+### Test Categories
+
+#### 1. BASE_URL Compliance Testing
+**Critical for PowerSchool deployment success**
+
+```bash
+pnpm test:routing  # Validates all URL patterns
+```
+
+Tests that catch common deployment failures:
+- **HTML files** — ensures all script imports use BASE_URL-aware paths, not hardcoded `/src/`
+- **Component links** — validates navigation uses `linkHelpers` not direct hardcoded paths  
+- **Data fetching** — confirms fetch URLs work in both dev and production
+- **Print page URLs** — validates window.open() paths are environment-aware
+
+**Example test patterns caught:**
+```javascript
+// ❌ FAILS TEST (hardcoded dev path)
+import('/src/Dashboard.svelte')
+
+// ✅ PASSES TEST (BASE_URL aware)
+const basePath = window.location.pathname.includes('/eld-progress-report/') ? '/eld-progress-report' : ''
+const path = isDev ? `${basePath}/src/Dashboard.svelte` : '/eld-progress-report/dashboard.js'
+```
+
+#### 2. Component Testing
+**Validates Svelte component behavior**
+
+```bash
+pnpm test:components  # Component unit tests
+```
+
+- **StudentTable** — filtering, sorting, report link generation
+- **AssessmentGrid** — data display, progress calculation
+- **DashboardStats** — filtering counts, ELD student detection
+- **Custom elements** — proper mounting and data flow
+
+#### 3. File-based Pattern Testing
+**Automated antipattern detection**
+
+```bash
+pnpm test:html  # Scans all HTML files for compliance
+```
+
+Automatically scans HTML files for:
+- Hardcoded `/src/` imports
+- Missing BASE_URL handling
+- Incorrect script tag patterns
+- Dev-only paths in production builds
+
+#### 4. Integration Testing
+**End-to-end workflow validation**
+
+```bash
+pnpm test:e2e  # Full user journey testing
+```
+
+- Dashboard loads → Student filtering works → View Report navigation → Assessment display
+- Print functionality works across all pages
+- Data fetching succeeds in both environments
+
+### Test Configuration
+
+**vitest.config.ts:**
+```typescript
+import { defineConfig } from 'vitest/config'
+import { svelte } from '@sveltejs/vite-plugin-svelte'
+
+export default defineConfig({
+  plugins: [svelte({ hot: !process.env.VITEST })],
+  test: {
+    globals: true,
+    environment: 'happy-dom',
+    setupFiles: ['./src/test/setup.ts']
+  }
+})
+```
+
+### Running Tests
+
+```bash
+# Full test suite
+pnpm test
+
+# Watch mode during development  
+pnpm test:watch
+
+# Specific test categories
+pnpm test:routing      # BASE_URL compliance only
+pnpm test:components   # Svelte component tests only
+pnpm test:html         # HTML file pattern validation
+```
+
+### Why This Testing Strategy?
+
+**Lessons learned from PowerSchool plugin deployments:**
+
+1. **95% of deployment failures** are path/URL related — BASE_URL compliance testing catches these
+2. **HTML file patterns** are easy to get wrong when copying between dev/prod — automated scanning prevents this
+3. **Component navigation** breaks silently — explicit link testing finds issues early
+4. **Build differences** between dev and prod are subtle — file-based tests catch antipatterns
+
+### Test-Driven Development Workflow
+
+1. **Write failing test** for new navigation/URL feature
+2. **Implement feature** until test passes
+3. **Run full test suite** to catch regressions
+4. **Build and manually verify** in dev server
+5. **Deploy to staging** with confidence
+
+### Common Test Failures & Fixes
+
+**"Hardcoded path detected"** → Use BASE_URL-aware pattern:
+```javascript
+// Instead of: '/src/Dashboard.svelte'
+const path = isDev ? `${basePath}/src/Dashboard.svelte` : '/eld-progress-report/dashboard.js'
+```
+
+**"Component navigation broken"** → Use linkHelpers:
+```typescript
+// Instead of: `report.html?student_dcid=${student.dcid}`
+reportUrl: linkHelpers.reportUrl(student.dcid)
+```
+
+**"Data fetch 404 in dev"** → Use BASE_URL in fetch:
+```typescript
+// Instead of: fetch('/eld.json')
+fetch(`${import.meta.env.BASE_URL}eld.json`)
+```
+
+---
+
+## Debug Mode (Runtime Diagnostics)
+
+This plugin supports a robust debug mode for deployment in uncertain environments (like PowerSchool) and for easier troubleshooting/non-console users.
+
+- **Enable via** query string (`?eld_debug=1`), `localStorage` (`eld_debug`), or automatically in dev build.
+- **Effect:**
+  - Adds a floating DebugBar overlay with real-time health/status, mounting events, errors, and useful environment info (BASE_URL, view, etc.)
+  - Captures every debug event/error via a shared `window.eldDebug` object.
+  - All debug logs/errors use `eldDebug.log/error()`—never scattered `console.log`s.
+  - Users/devs can see and copy error details even if they can't open the browser console.
+
+**Best practices:**
+- Add a debug log for every critical lifecycle event: script load, mount, missing element, API fail, view change, etc.
+- Avoid showing debug overlay in production unless enabled by user/dev.
+- In field-trips style, prefer in-app runtime diagnostics over buried console noise, especially for support and version tracking.
+
+---
+
+## Visual Style Guide
+
+This project uses a modern, minimal, readable design that matches PowerSchool’s admin/teacher UI, with a focus on clarity and accessibility.
+
+### Fonts
+- **Font stack:** `-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`
+- **Font sizes:**
+  - Page/content text: 15px–16px
+  - Subtitles: 14px
+  - Labels/meta: 11px–13px
+  - Headings: 22px–24px
+
+### Colors
+- **Primary blue:** #1976d2
+- **Subdued blue:** #1565c0
+- **Highlight (background):** #e3f2fd
+- **Error:** #c62828 (text on #ffebee background)
+- **Success/OK:** system default
+- **Text:** #333 on #fff/#f5f5f5 backgrounds; #666/#888 for secondary
+
+### Spacing & Borders
+- **Border-radius:** 4px–8px on cards, buttons, header boxes
+- **Box shadow:** soft, `0 2px 4px rgba(0,0,0,.08)` on cards/headers
+- **Padding/margin:** 12–24px on headers, cards, filter rows
+- **Table row hover:** #f5f9ff background
+
+### Buttons
+- **Primary (blue):** background #1976d2, white text
+- **Secondary (gray):** background #78909c, white text
+- **Shape:** Rounded corners, font 13px
+- **Hover:** Darker tone
+
+### Layout
+- **Max width:** 1200px (centered)
+- **Cards:** White backgrounds, shadow, padding
+- **Dashboard grid/stat cards**: 4-column responsive
+
+### General Principles
+- Consistent use of CSS variables and classes
+- Easy to expand/adapt style for new plugins
+- Styles scoped to `.eld` and components to avoid global leak
+
+---
+
 ## Svelte 5 Patterns Used
 
 ### Props (replacing Svelte 4's `export let`)
@@ -316,8 +580,116 @@ No extra configuration needed — the directory structure IS the configuration.
 
 ---
 
-## Status (as of 2026-04-23)
+---
 
+## NEXT-GEN ARCHITECTURE ROADMAP (Field Trips → ELD)
+
+Based on analysis in `FIELD-TRIP-COMPARISON.md`, the following patterns from our gold-standard field-trips project need to be adopted:
+
+### Phase 1: CRITICAL Foundation (Do First) 🔥
+
+#### Custom Element Architecture Upgrade
+- [ ] **Convert App.svelte to custom element pattern**
+  - `<svelte:options customElement="eld-progress-report-app" />`
+  - Replace `<eld-dashboard>` with `<eld-progress-report-app portal="admin" year-id="~(curyearid)">`
+  - Multi-attribute prop handling (user-type, user-role, year-id)
+  - Shadow DOM support
+
+#### Props-Based Configuration System
+- [ ] **Implement field-trips prop pattern**
+  - Support kebab-case and camelCase attributes
+  - Fallback chain for missing props
+  - PowerSchool template variable integration
+  - Type-safe configuration with derived reactive state
+
+#### Multi-Agent Development Infrastructure
+- [ ] **Create `AGENTS.md`** — AI development best practices
+- [ ] **Set up `TODO.md` system** — shared coordination between AI agents
+- [ ] **Add `AGENT_STATUS.md`** — heartbeat tracking
+- [ ] **Voice notification integration** — `vox` command for human escalation
+- [ ] **Environment validation script** — `scripts/validate-dev-env.js`
+
+#### Test-Driven Development Workflow
+- [ ] **Enforce TDD practices** — write tests first, then implement
+- [ ] **Component test templates** — standardized testing patterns
+- [ ] **Continuous validation** — automated test running
+- [ ] **Coverage requirements** — maintain test coverage standards
+
+### Phase 2: HIGH Priority Architecture (Do Next) ⚡
+
+#### Layout Component Architecture
+- [ ] **Create `EldLayout.svelte`** — role-based layout switching
+- [ ] **Separate App.svelte concerns** — delegate to layout component
+- [ ] **Role-based routing** — admin/teacher/guardian specific layouts
+- [ ] **Clean component hierarchy**
+
+#### Shadow DOM CSS Injection
+- [ ] **Implement `injectShadowCss` pattern**
+- [ ] **PowerSchool CSS isolation** — prevent style conflicts
+- [ ] **Professional styling integration**
+- [ ] **Shadow root detection and handling**
+
+#### Sophisticated Store Architecture
+- [ ] **Create user role store** — centralized role management
+- [ ] **Reactive state patterns** — Svelte 5 + store integration
+- [ ] **Derived state management** — computed values from stores
+- [ ] **State synchronization** — props ↔ stores coordination
+
+#### Enhanced Debug Tooling
+- [ ] **Debug toolbar for development**
+- [ ] **Print route detection** — special handling for print views  
+- [ ] **Environment-aware debugging** — dev vs prod tooling
+- [ ] **Error boundary patterns** — graceful error handling
+
+### Phase 3: MEDIUM Priority Features (Nice to Have) ✨
+
+#### Context7 Integration
+- [ ] **Developer reference API access**
+- [ ] **Best practices queries** — automated documentation lookup
+- [ ] **TDD-specific Context7 queries**
+- [ ] **Authentication setup**
+
+#### Advanced PowerSchool Integration
+- [ ] **Cache busting patterns** — `~(random16)` integration
+- [ ] **Sophisticated dev/prod script loading**
+- [ ] **Error handling improvements**
+- [ ] **Console logging standards**
+
+#### File Organization Restructure
+- [ ] **Role-based component folders**
+  - `src/lib/components/ui/` — reusable components
+  - `src/lib/components/eld/admin/` — admin-specific
+  - `src/lib/components/eld/teacher/` — teacher-specific
+  - `src/lib/components/eld/guardian/` — guardian-specific
+  - `src/lib/components/debug/` — development tools
+
+### Phase 4: INNOVATION Opportunities (Beyond Field Trips) 🚀
+
+#### Enhanced Routing
+- [ ] **Better SPA routing** — improve current URL param system
+- [ ] **History API integration** — browser back/forward support
+- [ ] **Deep linking** — bookmarkable URLs
+
+#### Performance Optimization
+- [ ] **Bundle optimization** — code splitting strategies
+- [ ] **Lazy loading** — component-level lazy loading
+- [ ] **Caching strategies** — intelligent data caching
+
+#### Component Library Foundation
+- [ ] **Reusable UI components** — for other TESD plugins
+- [ ] **Design system** — consistent styling patterns
+- [ ] **Accessibility improvements** — better a11y than current
+
+#### State Management Evolution
+- [ ] **Advanced reactive patterns** — sophisticated Svelte 5 usage
+- [ ] **Cross-component communication** — better than current approach
+- [ ] **Data flow optimization** — efficient data management
+
+---
+
+## Current Status (as of 2026-04-23)
+
+### ✅ COMPLETED - Basic Svelte 5 Implementation
 - [x] package.json updated (`type: module`, dev deps, scripts)
 - [x] vite.config.ts created
 - [x] TypeScript configs created (tsconfig.json / app / node)
@@ -338,6 +710,9 @@ No extra configuration needed — the directory structure IS the configuration.
 - [x] `src/vite-env.d.ts` added (`/// <reference types="vite/client" />`)
 - [x] `DATA_URL` fixed — uses `import.meta.env.BASE_URL` so dev fetch hits `/eld-progress-report/eld.json`
 - [x] End-to-end dev server test — dashboard renders 6,803 students, filters work
+
+### 🔄 NEXT IMMEDIATE TASKS
 - [ ] Click "View Report" and verify assessment grid on report page
-- [ ] `pnpm package` → upload ZIP to PowerSchool staging
+- [ ] `pnpm package` → upload ZIP to PowerSchool staging  
 - [ ] Production smoke test
+- [ ] **BEGIN PHASE 1** — Custom element architecture upgrade

@@ -4,6 +4,11 @@
   import { formatName, formatDate, getMetadataFields, getAssessmentLabel, groupAssessmentFields, getMarkingPeriods } from '$lib/utils'
   import type { Student } from '$lib/data'
 
+  let { student_dcid = '', onNavigate } = $props<{
+    student_dcid?: string
+    onNavigate?: (view: string, params?: Record<string, string>) => void
+  }>()
+
   let students = $state<Student[]>([])
   let error = $state<string | null>(null)
 

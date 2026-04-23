@@ -15,8 +15,8 @@
 
   <script type="module">
     const isDev = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
-    const path = isDev ? '/src/Report.svelte' : '/eld-progress-report/report.js?v=~(random16)'
-    import(path).catch(e => console.error('ELD load failed:', e))
+    const path = isDev ? '/src/main.ts' : '/eld-progress-report/report.js?v=~(random16)'
+    import(/* @vite-ignore */ path).catch(e => console.error('ELD load failed:', e))
   </script>
 
   ~[wc:teachers_footer_css]

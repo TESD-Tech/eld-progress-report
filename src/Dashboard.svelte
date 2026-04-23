@@ -7,9 +7,12 @@
   import SummaryStats from './components/SummaryStats.svelte'
   import FilterBar from './components/FilterBar.svelte'
   import StudentTable from './components/StudentTable.svelte'
-  import DevToolbar from './components/DevToolbar.svelte'
+  import DebugBar from './components/DebugBar.svelte'
 
-  let { portal = 'admin' } = $props<{ portal?: string }>()
+  let { portal = 'admin', onNavigate } = $props<{ 
+    portal?: string
+    onNavigate?: (view: string, params?: Record<string, string>) => void 
+  }>()
 
   let students = $state<Student[]>([])
   let loading = $state(true)
@@ -55,9 +58,7 @@
 
     <div class="filter-row">
       <FilterBar bind:search bind:grade bind:room {grades} {rooms} />
-      <button class="print-all-btn" onclick={() => printMultipleReports(filtered)}>
-        Print All ({filtered.length})
-      </button>
+
     </div>
 
     {#if selected.length > 0}
@@ -68,12 +69,12 @@
       </div>
     {/if}
 
-    <StudentTable students={filtered} {portal} onSelect={(s) => { selected = s }} />
+    <StudentTable students={filtered} {portal} onSelect={(s) => { selected = s }} {onNavigate} />
   {/if}
 </div>
 
 {#if import.meta.env.DEV}
-  <DevToolbar currentPortal={portal} currentPage="dashboard" {students} />
+  <DebugBar />
 {/if}
 
 <style>

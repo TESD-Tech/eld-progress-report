@@ -2,19 +2,28 @@
   import { formatName, formatDate, calculateProgress } from '$lib/utils'
   import ProgressBar from './ProgressBar.svelte'
   import type { Student } from '$lib/data'
+  import { reportUrl } from '$lib/utils/linkHelpers'
 
-  let { students = [], portal = 'admin', onSelect } = $props<{
+  let { students = [], portal = 'admin', onSelect, onNavigate } = $props<{
     students?: Student[]
     portal?: string
     onSelect?: (selected: Student[]) => void
+    onNavigate?: (view: string, params?: Record<string, string>) => void
   }>()
-
-  const devPrefix = import.meta.env.DEV ? '/src/powerschool/WEB_ROOT' : ''
 
   let selected = $state(new Set<string>())
 
   function reportHref(dcid: string) {
-    return `${devPrefix}/${portal}/eld-progress-report/report.html?student_dcid=${dcid}`
+    return reportUrl(dcid)
+  }
+
+  function handleReportClick(event: Event, dcid: string) {
+    // If we have SPA navigation, use it instead of href navigation
+    if (onNavigate) {
+      event.preventDefault()
+      onNavigate('report', { student_dcid: dcid })
+    }
+    // Otherwise, let the href handle navigation (fallback)
   }
 
   function toggleAll(checked: boolean) {
@@ -66,7 +75,7 @@
               {/if}
             </td>
             <td>
-              <a href={reportHref(s.student_dcid)} class="btn">View Report</a>
+              <a href={reportHref(s.student_dcid)} class="btn" onclick={(e) => handleReportClick(e, s.student_dcid)}>View Report</a>
             </td>
           </tr>
         {/each}
