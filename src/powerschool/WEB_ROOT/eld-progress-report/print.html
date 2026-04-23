@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ELD Progress Report — Print</title>
+  <meta charset="UTF-8">
+  <style> body { margin: 0; background: white; } </style>
+</head>
+<body>
+  <eld-print-page></eld-print-page>
+  <script type="module">
+    const isDev = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+    const path = isDev ? '/src/PrintPage.svelte' : '/eld-progress-report/print.js?v=~(random16)'
+    import(path).catch(e => console.error('ELD print load failed:', e))
+  </script>
+</body>
+</html>

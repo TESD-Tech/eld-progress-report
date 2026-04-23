@@ -3,13 +3,30 @@
   import ProgressBar from './ProgressBar.svelte'
   import type { Student } from '$lib/data'
 
-  let { students = [], portal = 'admin' } = $props<{
+  let { students = [], portal = 'admin', onSelect } = $props<{
     students?: Student[]
     portal?: string
+    onSelect?: (selected: Student[]) => void
   }>()
 
+  const devPrefix = import.meta.env.DEV ? '/src/powerschool/WEB_ROOT' : ''
+
+  let selected = $state(new Set<string>())
+
   function reportHref(dcid: string) {
-    return `/${portal}/eld-progress-report/report.html?student_dcid=${dcid}`
+    return `${devPrefix}/${portal}/eld-progress-report/report.html?student_dcid=${dcid}`
+  }
+
+  function toggleAll(checked: boolean) {
+    selected = checked ? new Set(students.map(s => s.student_dcid)) : new Set()
+    onSelect?.(checked ? [...students] : [])
+  }
+
+  function toggleOne(dcid: string) {
+    const next = new Set(selected)
+    next.has(dcid) ? next.delete(dcid) : next.add(dcid)
+    selected = next
+    onSelect?.(students.filter(s => next.has(s.student_dcid)))
   }
 </script>
 
@@ -20,6 +37,7 @@
     <table>
       <thead>
         <tr>
+          <th class="check-col"><input type="checkbox" onchange={e => toggleAll((e.target as HTMLInputElement).checked)} /></th>
           <th>Student</th>
           <th>Grade</th>
           <th>Room</th>
@@ -32,6 +50,7 @@
         {#each students as s}
           {@const p = s.response?.fields ? calculateProgress(s.response.fields) : null}
           <tr>
+            <td class="check-col"><input type="checkbox" checked={selected.has(s.student_dcid)} onchange={() => toggleOne(s.student_dcid)} /></td>
             <td>
               <div class="name">{formatName(s)}</div>
               <div class="sid">ID: {s.student_number}</div>
@@ -57,6 +76,7 @@
 </div>
 
 <style>
+  .check-col { width: 40px; text-align: center; }
   .table-wrap {
     background: white;
     border-radius: 8px;

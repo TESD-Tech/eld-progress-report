@@ -90,11 +90,11 @@
   .period-col { text-align: center; min-width: 120px; }
   .skill-name { font-weight: 500; }
   .cell { text-align: center; font-weight: 700; font-size: 16px; }
-  .val-meets { color: #388e3c; }
-  .val-approaching { color: #f57c00; }
-  .val-below { color: #d32f2f; }
-  .val-exceeds { color: #1976d2; }
-  .val-empty { color: #aaa; }
+  .val-meets { background: #e8f5e9; color: #2e7d32; }
+  .val-approaching { background: #fff8e1; color: #e65100; }
+  .val-below { background: #ffebee; color: #c62828; }
+  .val-exceeds { background: #e3f2fd; color: #0d47a1; }
+  .val-empty { background: #fafafa; color: #bbb; }
   tr:last-child td { border-bottom: none; }
   .empty { color: #aaa; text-align: center; padding: 32px 0; margin: 0; }
   @media print {

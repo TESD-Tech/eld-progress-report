@@ -3,9 +3,11 @@
   import { onMount } from 'svelte'
   import { loadStudents, filterStudents, getDashboardSummary, type Student } from '$lib/data'
   import { getUniqueGrades, getUniqueRooms } from '$lib/utils'
+  import { printMultipleReports } from '$lib/printUtils'
   import SummaryStats from './components/SummaryStats.svelte'
   import FilterBar from './components/FilterBar.svelte'
   import StudentTable from './components/StudentTable.svelte'
+  import DevToolbar from './components/DevToolbar.svelte'
 
   let { portal = 'admin' } = $props<{ portal?: string }>()
 
@@ -15,6 +17,7 @@
   let search = $state('')
   let grade = $state('')
   let room = $state('')
+  let selected = $state<Student[]>([])
 
   let filtered = $derived(filterStudents(students, search, grade, room))
   let summary = $derived(getDashboardSummary(students))
@@ -49,10 +52,29 @@
     <div class="err"><strong>Error:</strong> {error}</div>
   {:else}
     <SummaryStats {...summary} />
-    <FilterBar bind:search bind:grade bind:room {grades} {rooms} />
-    <StudentTable students={filtered} {portal} />
+
+    <div class="filter-row">
+      <FilterBar bind:search bind:grade bind:room {grades} {rooms} />
+      <button class="print-all-btn" onclick={() => printMultipleReports(filtered)}>
+        Print All ({filtered.length})
+      </button>
+    </div>
+
+    {#if selected.length > 0}
+      <div class="print-bar">
+        <span>{selected.length} student{selected.length === 1 ? '' : 's'} selected</span>
+        <button onclick={() => printMultipleReports(selected)}>Print Selected</button>
+        <button class="clear-btn" onclick={() => { selected = [] }}>Clear</button>
+      </div>
+    {/if}
+
+    <StudentTable students={filtered} {portal} onSelect={(s) => { selected = s }} />
   {/if}
 </div>
+
+{#if import.meta.env.DEV}
+  <DevToolbar currentPortal={portal} currentPage="dashboard" {students} />
+{/if}
 
 <style>
   :host { display: block; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
@@ -88,4 +110,50 @@
     padding: 16px;
     border-radius: 8px;
   }
+  .filter-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .filter-row :global(.filter-bar) {
+    flex: 1;
+    margin-bottom: 0;
+  }
+  .print-all-btn {
+    padding: 8px 16px;
+    background: #1976d2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    align-self: center;
+  }
+  .print-all-btn:hover { background: #1565c0; }
+  .print-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    background: #e3f2fd;
+    border: 1px solid #90caf9;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #1565c0;
+  }
+  .print-bar button {
+    padding: 5px 14px;
+    background: #1976d2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .print-bar button:hover { background: #1565c0; }
+  .clear-btn { background: #78909c !important; }
+  .clear-btn:hover { background: #607d8b !important; }
 </style>

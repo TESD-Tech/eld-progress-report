@@ -83,6 +83,18 @@ export function getUniqueRooms(students: Student[]): string[] {
   return [...new Set(students.map(s => s.home_room).filter(Boolean))].sort()
 }
 
+const METADATA_TITLES = ['Proficiency Level', 'ELD Teacher', 'Current English Proficiency Level']
+
+export function getMetadataFields(fields: StudentField[]): Record<string, string> {
+  const result: Record<string, string> = {}
+  for (const f of fields) {
+    if (METADATA_TITLES.includes(f.title) && f.value) {
+      result[f.title] = f.value
+    }
+  }
+  return result
+}
+
 export function getAssessmentLabel(value: string | null | undefined): {
   symbol: string
   meaning: string

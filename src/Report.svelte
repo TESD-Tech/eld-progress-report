@@ -2,31 +2,36 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import { loadStudents, type Student } from '$lib/data'
-  import { parseStudentDcid, formatName, formatDate, calculateProgress } from '$lib/utils'
+  import { parseStudentDcid, formatName, formatDate, calculateProgress, getMetadataFields } from '$lib/utils'
+  import { printReport } from '$lib/printUtils'
   import AssessmentGrid from './components/AssessmentGrid.svelte'
+  import DevToolbar from './components/DevToolbar.svelte'
 
   let { portal = 'admin' } = $props<{ portal?: string }>()
 
   let student = $state<Student | null>(null)
+  let students = $state<Student[]>([])
   let loading = $state(true)
   let error = $state<string | null>(null)
+  let dcid = $state<string>('')
 
   function dashboardHref() {
-    if (portal === 'admin') return '/admin/eld-progress-report/dashboard.html'
-    if (portal === 'teachers') return '/teachers/eld-progress-report/dashboard.html'
+    const devPrefix = import.meta.env.DEV ? '/src/powerschool/WEB_ROOT' : ''
+    if (portal === 'admin') return `${devPrefix}/admin/eld-progress-report/dashboard.html`
+    if (portal === 'teachers') return `${devPrefix}/teachers/eld-progress-report/dashboard.html`
     return '#'
   }
 
   onMount(async () => {
-    const dcid = parseStudentDcid()
+    dcid = parseStudentDcid() ?? ''
     if (!dcid) {
       error = 'No student_dcid provided in URL'
       loading = false
       return
     }
     try {
-      const all = await loadStudents()
-      student = all.find(s => s.student_dcid === dcid) ?? null
+      students = await loadStudents()
+      student = students.find(s => s.student_dcid === dcid) ?? null
       if (!student) error = `Student ${dcid} not found`
     } catch (e) {
       error = e instanceof Error ? e.message : 'Failed to load data'
@@ -66,6 +71,16 @@
               <span class="val">{p.percent}% ({p.meets}/{p.total} skills meeting expectations)</span>
             </div>
           {/if}
+          {@const meta = getMetadataFields(student.response.fields)}
+          {#if meta['Proficiency Level']}
+            <div><span class="label">Proficiency Level</span><span class="val">{meta['Proficiency Level']}</span></div>
+          {/if}
+          {#if meta['Current English Proficiency Level']}
+            <div><span class="label">Current English Proficiency Level</span><span class="val">{meta['Current English Proficiency Level']}</span></div>
+          {/if}
+          {#if meta['ELD Teacher']}
+            <div><span class="label">ELD Teacher</span><span class="val">{meta['ELD Teacher']}</span></div>
+          {/if}
         {/if}
       </div>
     </div>
@@ -73,10 +88,14 @@
     <AssessmentGrid fields={student.response?.fields ?? []} />
 
     <div class="print-row">
-      <button onclick={() => window.print()}>Print Report</button>
+      <button onclick={() => printReport(student!)}>Print Report</button>
     </div>
   {/if}
 </div>
+
+{#if import.meta.env.DEV}
+  <DevToolbar currentPortal={portal} currentPage="report" {students} currentDcid={dcid} />
+{/if}
 
 <style>
   :host { display: block; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }

@@ -31,6 +31,7 @@ export default defineConfig({
       input: {
         dashboard: path.resolve(__dirname, 'src/Dashboard.svelte'),
         report:    path.resolve(__dirname, 'src/Report.svelte'),
+        print:     path.resolve(__dirname, 'src/PrintPage.svelte'),
       },
       plugins: [noEmptyChunks()],
       output: {
