@@ -2,48 +2,31 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import { loadStudents, type Student } from '$lib/data'
-  import { parseStudentDcid, formatName, formatDate, calculateProgress, getMetadataFields } from '$lib/utils'
+  import { formatName, formatDate, calculateProgress, getMetadataFields } from '$lib/utils'
   import { printReport } from '$lib/printUtils'
   import AssessmentGrid from './components/AssessmentGrid.svelte'
   import DebugBar from './components/DebugBar.svelte'
 
-  let { portal = 'admin', student_dcid = '', onNavigate } = $props<{ 
+  let { portal = 'admin', student_dcid = '', onBack } = $props<{
     portal?: string
     student_dcid?: string
-    onNavigate?: (view: string, params?: Record<string, string>) => void 
+    onBack?: () => void
   }>()
 
   let student = $state<Student | null>(null)
-  let students = $state<Student[]>([])
   let loading = $state(true)
   let error = $state<string | null>(null)
 
-  function handleDashboardClick(event: Event) {
-    // If we have SPA navigation, use it instead of href navigation
-    if (onNavigate) {
-      event.preventDefault()
-      onNavigate('dashboard')
-    }
-    // Otherwise, let the href handle navigation (fallback)
-  }
-
-  function dashboardHref() {
-    const devPrefix = import.meta.env.DEV ? '/src/powerschool/WEB_ROOT' : ''
-    if (portal === 'admin') return `${devPrefix}/admin/eld-progress-report/dashboard.html`
-    if (portal === 'teachers') return `${devPrefix}/teachers/eld-progress-report/dashboard.html`
-    return '#'
-  }
-
   onMount(async () => {
     if (!student_dcid) {
-      error = 'No student_dcid provided'
+      error = 'No student selected.'
       loading = false
       return
     }
     try {
-      students = await loadStudents()
+      const students = await loadStudents()
       student = students.find(s => s.student_dcid === student_dcid) ?? null
-      if (!student) error = `Student ${student_dcid} not found`
+      if (!student) error = 'Student not found.'
     } catch (e) {
       error = e instanceof Error ? e.message : 'Failed to load data'
     } finally {
@@ -53,11 +36,9 @@
 </script>
 
 <div class="eld">
-  {#if portal !== 'guardian'}
-    <div class="breadcrumb">
-      <a href={dashboardHref()} onclick={handleDashboardClick}>← Back to Dashboard</a>
-    </div>
-  {/if}
+  <div class="breadcrumb">
+    <button class="back-btn" onclick={onBack}>← Back to Dashboard</button>
+  </div>
 
   {#if loading}
     <div class="loading">
@@ -112,8 +93,15 @@
   :host { display: block; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
   .eld { max-width: 1000px; margin: 0 auto; padding: 20px; background: #f5f5f5; min-height: 100vh; box-sizing: border-box; }
   .breadcrumb { margin-bottom: 16px; }
-  .breadcrumb a { color: #1976d2; text-decoration: none; font-size: 14px; }
-  .breadcrumb a:hover { text-decoration: underline; }
+  .back-btn {
+    background: none;
+    border: none;
+    color: #1976d2;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0;
+  }
+  .back-btn:hover { text-decoration: underline; }
   .loading {
     display: flex;
     align-items: center;

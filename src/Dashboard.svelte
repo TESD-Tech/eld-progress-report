@@ -9,9 +9,9 @@
   import StudentTable from './components/StudentTable.svelte'
   import DebugBar from './components/DebugBar.svelte'
 
-  let { portal = 'admin', onNavigate } = $props<{ 
+  let { portal = 'admin', onStudentSelect } = $props<{
     portal?: string
-    onNavigate?: (view: string, params?: Record<string, string>) => void 
+    onStudentSelect?: (dcid: string) => void
   }>()
 
   let students = $state<Student[]>([])
@@ -58,7 +58,6 @@
 
     <div class="filter-row">
       <FilterBar bind:search bind:grade bind:room {grades} {rooms} />
-
     </div>
 
     {#if selected.length > 0}
@@ -69,7 +68,7 @@
       </div>
     {/if}
 
-    <StudentTable students={filtered} {portal} onSelect={(s) => { selected = s }} {onNavigate} />
+    <StudentTable students={filtered} {portal} onSelect={(s) => { selected = s }} {onStudentSelect} />
   {/if}
 </div>
 
@@ -121,18 +120,6 @@
     flex: 1;
     margin-bottom: 0;
   }
-  .print-all-btn {
-    padding: 8px 16px;
-    background: #1976d2;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 13px;
-    cursor: pointer;
-    white-space: nowrap;
-    align-self: center;
-  }
-  .print-all-btn:hover { background: #1565c0; }
   .print-bar {
     display: flex;
     align-items: center;

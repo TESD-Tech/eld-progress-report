@@ -2,29 +2,15 @@
   import { formatName, formatDate, calculateProgress } from '$lib/utils'
   import ProgressBar from './ProgressBar.svelte'
   import type { Student } from '$lib/data'
-  import { reportUrl } from '$lib/utils/linkHelpers'
 
-  let { students = [], portal = 'admin', onSelect, onNavigate } = $props<{
+  let { students = [], portal = 'admin', onSelect, onStudentSelect } = $props<{
     students?: Student[]
     portal?: string
     onSelect?: (selected: Student[]) => void
-    onNavigate?: (view: string, params?: Record<string, string>) => void
+    onStudentSelect?: (dcid: string) => void
   }>()
 
   let selected = $state(new Set<string>())
-
-  function reportHref(dcid: string) {
-    return reportUrl(dcid)
-  }
-
-  function handleReportClick(event: Event, dcid: string) {
-    // If we have SPA navigation, use it instead of href navigation
-    if (onNavigate) {
-      event.preventDefault()
-      onNavigate('report', { student_dcid: dcid })
-    }
-    // Otherwise, let the href handle navigation (fallback)
-  }
 
   function toggleAll(checked: boolean) {
     selected = checked ? new Set(students.map(s => s.student_dcid)) : new Set()
@@ -75,7 +61,7 @@
               {/if}
             </td>
             <td>
-              <a href={reportHref(s.student_dcid)} class="btn" onclick={(e) => handleReportClick(e, s.student_dcid)}>View Report</a>
+              <button class="btn" onclick={() => onStudentSelect?.(s.student_dcid)}>View Report</button>
             </td>
           </tr>
         {/each}
@@ -121,10 +107,11 @@
     padding: 5px 12px;
     background: #1976d2;
     color: white;
-    text-decoration: none;
+    border: none;
     border-radius: 4px;
     font-size: 13px;
     white-space: nowrap;
+    cursor: pointer;
   }
   .btn:hover { background: #1565c0; }
   .empty {

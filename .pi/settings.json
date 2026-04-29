@@ -1,0 +1,17 @@
+{
+  "theme": "everforest",
+  "enabledModels": [
+    "github-copilot/gpt-4.1",
+    "github-copilot/claude-sonnet-4"
+  ],
+  "packages": ["npm:pi-subagents"],
+  "skills": [
+    "context7-mcp",
+    "powerschool-svelte5-bestpractices"
+  ],
+  "extensions": [],
+  "scopedModels": [
+    "github-copilot/gpt-4.1",
+    "github-copilot/claude-sonnet-4"
+  ]
+}

@@ -1,9 +1,8 @@
 /**
- * Tests for StudentTable component routing
- * Catches the exact issue where View Report links were broken
+ * Tests for StudentTable component
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/svelte'
+import { render, screen, fireEvent } from '@testing-library/svelte'
 import StudentTable from '../components/StudentTable.svelte'
 import type { Student } from '../lib/data'
 
@@ -36,103 +35,37 @@ const mockStudents: Student[] = [
   }
 ]
 
-describe('StudentTable Component', () => {
-  it('should render student data correctly', () => {
+describe('StudentTable', () => {
+  it('renders student data correctly', () => {
     render(StudentTable, { students: mockStudents })
-    
     expect(screen.getByText('Fizz Tester')).toBeInTheDocument()
     expect(screen.getByText('Buzz Tester')).toBeInTheDocument()
-    expect(screen.getByText('2034095')).toBeInTheDocument()
-    expect(screen.getByText('Grade 4')).toBeInTheDocument()
+    expect(screen.getByText('ID: 2034095')).toBeInTheDocument()
   })
 
-  it('should generate correct View Report links using linkHelpers', () => {
+  it('renders a View Report button for each student', () => {
     render(StudentTable, { students: mockStudents })
-    
-    // Find all "View Report" links
-    const reportLinks = screen.getAllByText('View Report')
-    expect(reportLinks).toHaveLength(2)
-    
-    // Check that the first link has the correct href
-    const firstLink = reportLinks[0].closest('a')
-    expect(firstLink).toHaveAttribute('href', '/eld-progress-report/report.html?student_dcid=42318')
-    
-    // Check that the second link has the correct href
-    const secondLink = reportLinks[1].closest('a')
-    expect(secondLink).toHaveAttribute('href', '/eld-progress-report/report.html?student_dcid=42319')
+    const buttons = screen.getAllByText('View Report')
+    expect(buttons).toHaveLength(2)
+    // Buttons — not links — so no href
+    buttons.forEach(btn => expect(btn.tagName).toBe('BUTTON'))
   })
 
-  it('should NEVER generate hardcoded /src/ paths', () => {
-    render(StudentTable, { students: mockStudents })
-    
-    // Get all links in the table
-    const allLinks = screen.getAllByRole('link')
-    
-    allLinks.forEach(link => {
-      const href = link.getAttribute('href') || ''
-      
-      // These patterns should NEVER appear in our links
-      expect(href).not.toContain('/src/powerschool/WEB_ROOT')
-      expect(href).not.toMatch(/^\/src\//)
-      
-      // All report links should use BASE_URL
-      if (href.includes('report.html')) {
-        expect(href).toMatch(/^\/eld-progress-report\//)
-      }
-    })
+  it('calls onStudentSelect with the correct dcid when View Report is clicked', async () => {
+    const onStudentSelect = vi.fn()
+    render(StudentTable, { students: mockStudents, onStudentSelect })
+
+    const buttons = screen.getAllByText('View Report')
+    await fireEvent.click(buttons[0])
+    expect(onStudentSelect).toHaveBeenCalledWith('42318')
+
+    await fireEvent.click(buttons[1])
+    expect(onStudentSelect).toHaveBeenCalledWith('42319')
   })
 
-  it('should use linkHelpers consistently across portals', () => {
-    // Test admin portal
-    const { rerender } = render(StudentTable, { 
-      students: mockStudents, 
-      portal: 'admin' 
-    })
-    
-    let reportLink = screen.getAllByText('View Report')[0].closest('a')
-    expect(reportLink).toHaveAttribute('href', '/eld-progress-report/report.html?student_dcid=42318')
-    
-    // Test teachers portal - should generate same URL since linkHelpers handles context
-    rerender({ students: mockStudents, portal: 'teachers' })
-    
-    reportLink = screen.getAllByText('View Report')[0].closest('a')
-    expect(reportLink).toHaveAttribute('href', '/eld-progress-report/report.html?student_dcid=42318')
-    
-    // Test guardian portal
-    rerender({ students: mockStudents, portal: 'guardian' })
-    
-    reportLink = screen.getAllByText('View Report')[0].closest('a')
-    expect(reportLink).toHaveAttribute('href', '/eld-progress-report/report.html?student_dcid=42318')
-  })
-
-  it('should handle missing student data gracefully', () => {
+  it('shows empty state when no students match', () => {
     render(StudentTable, { students: [] })
-    
-    // Should not crash and should show no students
     expect(screen.queryByText('View Report')).not.toBeInTheDocument()
-  })
-})
-
-/**
- * Integration test to verify the exact fix we applied
- */
-describe('StudentTable - Regression Test for BASE_URL Issue', () => {
-  it('should use reportUrl from linkHelpers, not manual URL construction', () => {
-    render(StudentTable, { students: mockStudents })
-    
-    const reportLinks = screen.getAllByText('View Report')
-    
-    reportLinks.forEach((linkElement, index) => {
-      const link = linkElement.closest('a')
-      const href = link?.getAttribute('href')
-      
-      // Verify it follows the pattern generated by reportUrl()
-      const expectedHref = `/eld-progress-report/report.html?student_dcid=${mockStudents[index].student_dcid}`
-      expect(href).toBe(expectedHref)
-      
-      // Verify it DOES NOT follow the old broken pattern
-      const brokenPattern = `/src/powerschool/WEB_ROOT/admin/eld-progress-report/report.html?student_dcid=${mockStudents[index].student_dcid}`
-      expect(href).not.toBe(brokenPattern)
-    })
+    expect(screen.getByText('No students match the current filters.')).toBeInTheDocument()
   })
 })

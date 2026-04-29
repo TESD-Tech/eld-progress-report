@@ -5,15 +5,14 @@
   import './assets/global.css';
   import { injectShadowCss } from './lib/injectShadowCss';
 
-  // Svelte 5 best practice: Explicit prop declaration for custom elements
-  let { 
+  let {
     userType,
     userRole,
     usertype,
     portal = 'admin',
     'user-type': userTypeAttr,
     'user-role': userRoleAttr,
-    'year-id': yearIdAttr
+    'year-id': yearIdAttr,
   } = $props<{
     userType?: string;
     userRole?: string;
@@ -24,23 +23,16 @@
     'year-id'?: string;
   }>();
 
-  // Local state using $state rune (Svelte 5 best practice)
   let loading = $state(true);
   let error = $state(false);
 
-  function isPrintRoute(): boolean {
-    return window.location.pathname.endsWith('/print') || window.location.pathname.includes('/print/');
-  }
-
-  // Fallback configuration for ELD Progress Report
   const fallbackConfig = {
-    portal: 'admin',
     yearId: new Date().getFullYear().toString()
   };
 
   async function loadConfig() {
     try {
-      loading = false; // Stub - instant load (replace with ELD config if needed)
+      loading = false;
       error = false;
     } catch (e) {
       console.error('[ELD] Config load failed:', e);
@@ -49,7 +41,6 @@
     }
   }
 
-  // Svelte 5 $derived for computed values (best practice)
   const effectiveUserType = $derived(() => {
     return userType || usertype || userTypeAttr || userRole || userRoleAttr || portal || 'admin';
   });
@@ -58,16 +49,13 @@
     return yearIdAttr || fallbackConfig.yearId;
   });
 
-  // Bind a reference element so we can walk up to the shadow root.
   let mainEl: HTMLElement | undefined = $state();
 
   onMount(() => {
     loadConfig();
-    // Shadow DOM CSS injection for PowerSchool integration
     if (mainEl) {
       const sr = mainEl.getRootNode();
       if (sr instanceof ShadowRoot) {
-        // Custom element shadow DOM requires injected CSS
         injectShadowCss(sr, '');
       }
     }
@@ -77,9 +65,7 @@
 <svelte:options customElement="eld-progress-report-app" />
 
 <main bind:this={mainEl}>
-  {#if isPrintRoute()}
-    <p>ELD Progress Report Print View coming soon</p>
-  {:else if loading}
+  {#if loading}
     <p>Loading...</p>
   {:else if error}
     <p style="color: red; text-align: center; padding: 1rem;">
@@ -88,7 +74,7 @@
   {:else}
     <EldLayout userRole={effectiveUserType()} yearId={effectiveYearId()} />
   {/if}
-  {#if import.meta.env.DEV && !isPrintRoute()}
+  {#if import.meta.env.DEV}
     <DebugToolbar />
   {/if}
 </main>

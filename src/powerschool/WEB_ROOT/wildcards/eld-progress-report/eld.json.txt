@@ -82,7 +82,7 @@ WITH selected_students AS (
                         WHEN response_details.response_id IS NOT NULL THEN
                             JSON_OBJECT(
                                 'id'           VALUE TO_CHAR(response_details.response_id)
-                              , 'submitted_at' VALUE TO_CHAR(response_details.submitted_at, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+                              , 'submitted_at' VALUE TO_CHAR(response_details.submitted_at, 'YYYY-MM-DD"T"HH24' || CHR(58) || 'MI' || CHR(58) || 'SS"Z"')
                               , 'fields'       VALUE TREAT(response_details.fields_json AS JSON)
                               RETURNING CLOB
                             )
@@ -99,7 +99,7 @@ WITH selected_students AS (
 -- Final Output
 SELECT
     JSON_OBJECT(
-        'data' VALUE TREAT(COALESCE(students_array, TO_CLOB('[]')) AS JSON)
+        'data' VALUE TREAT(COALESCE(students_array, TO_CLOB(CHR(91) || CHR(93))) AS JSON)
         RETURNING CLOB
     ) AS full_json
 FROM student_json_payload;]~(json)[/tlist_sql]

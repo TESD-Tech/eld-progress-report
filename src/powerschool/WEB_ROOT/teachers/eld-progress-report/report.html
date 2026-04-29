@@ -11,11 +11,11 @@
   <a href="/teachers/eld-progress-report/dashboard.html">ELD Progress Report</a> &gt;
   Student Report
 
-  <eld-report portal="teachers"></eld-report>
+  <eld-progress-report-app portal="teacher" year-id="~(curyearid)"></eld-progress-report-app>
 
   <script type="module">
     const isDev = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
-    const path = isDev ? '/src/main.ts' : '/eld-progress-report/report.js?v=~(random16)'
+    const path = isDev ? '/src/main.ts' : '/eld-progress-report/app.js?v=~(random16)'
     import(/* @vite-ignore */ path).catch(e => console.error('ELD load failed:', e))
   </script>
 

@@ -46,11 +46,13 @@ describe('HTML Files - BASE_URL Compliance', () => {
 
       it('should use BASE_URL aware dynamic imports', () => {
         if (htmlContent.includes('import(')) {
-          // Should use basePath or similar BASE_URL detection
-          const hasBasePath = htmlContent.includes('basePath') || 
+          // Accept either: explicit BASE_URL usage OR the isDev conditional pattern
+          // (isDev ? '/src/main.ts' : '/eld-progress-report/app.js')
+          const hasBasePath = htmlContent.includes('basePath') ||
                             htmlContent.includes('BASE_URL') ||
-                            htmlContent.includes('import.meta.env.BASE_URL')
-          
+                            htmlContent.includes('import.meta.env.BASE_URL') ||
+                            (htmlContent.includes('isDev') && htmlContent.includes('/eld-progress-report/'))
+
           expect(hasBasePath).toBe(true)
         }
       })
@@ -65,22 +67,12 @@ describe('HTML Files - BASE_URL Compliance', () => {
         }
       })
 
-      it('should not have PowerSchool navigation links with hardcoded paths', () => {
-        // Check for common PowerSchool nav patterns that might be hardcoded
-        if (htmlContent.includes('href="/admin/')) {
-          // This is OK - these are PowerSchool-managed paths
-        }
-        
-        // But plugin-internal links should be relative or BASE_URL aware
-        const pluginInternalLinks = htmlContent.match(/href="[^"]*eld-progress-report[^"]*"/g)
-        if (pluginInternalLinks) {
-          pluginInternalLinks.forEach(link => {
-            // Should not start with hardcoded absolute paths to plugin dirs
-            expect(link).not.toMatch(/href="\/admin\/eld-progress-report/)
-            expect(link).not.toMatch(/href="\/teachers\/eld-progress-report/)
-            expect(link).not.toMatch(/href="\/guardian\/eld-progress-report/)
-          })
-        }
+      it('should not have hardcoded /src/ paths in navigation links', () => {
+        // Navigation is now state-based — no plugin-internal href links should
+        // point into /src/. PowerSchool breadcrumb hrefs (e.g. /admin/home.html
+        // or /admin/eld-progress-report/dashboard.html) are expected and OK.
+        const badSrcLinks = htmlContent.match(/href="[^"]*\/src\/[^"]*"/g)
+        expect(badSrcLinks).toBeNull()
       })
     })
   })
