@@ -40,9 +40,7 @@
 {#if error}
   <div class="print-error">{error}</div>
 {:else}
-  <div class="print-back-row">
-    <button class="print-back" onclick={() => onNavigate?.()}>← Back</button>
-  </div>
+  <button class="print-back-floating" onclick={() => onNavigate?.()}><span class="arrow">←</span><span class="back-text">Back</span></button>
   {#each students as student, i}
     <div class="page" class:page-break={i < students.length - 1}>
       <div class="page-header">
@@ -191,27 +189,36 @@
     .page { padding: 0; max-width: none; }
     .page-break { page-break-after: always; }
   }
-.print-back-row {
-  max-width: 800px;
-  display: inline;
-  /* margin: 0 auto 12px auto; */
-  text-align: left;
-}
-.print-back {
-  background: none;
-  border: none;
+.print-back-row { display: none; }
+.print-back-floating {
+  position: fixed;
+  top: 20px;
+  left: 24px;
+  z-index: 1100;
+  background: white;
+  border: 1px solid #dadada;
   color: #1976d2;
-  font-size: 14px;
+  font-size: 15px;
+  border-radius: 6px;
+  padding: 7px 16px;
   cursor: pointer;
-  padding: 0;
-  text-decoration: underline;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.09);
+  transition: box-shadow .13s, border-color .13s;
 }
-.print-back:hover {
+.print-back-floating:hover {
   color: #125699;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.14);
+  border-color: #b6b6b6;
+}
+.print-back-floating .back-text {
+  text-decoration: underline;
+  margin-left: 5px;
+}
+.print-back-floating .arrow {
+  text-decoration: none;
 }
 
 @media print {
-  .print-back-row { display: none; }
-  .print-back { display: none; }
+  .print-back-floating { display: none; }
 }
 </style>
