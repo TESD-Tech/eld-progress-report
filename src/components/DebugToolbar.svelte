@@ -272,4 +272,8 @@
   .go-btn:hover {
     background: #45a049;
   }
+  
+  @media print {
+    .debug-toolbar { display: none; }
+  }
 </style>

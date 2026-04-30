@@ -170,4 +170,8 @@
     font-weight: 600;
   }
   .go-btn:hover { background: #1565c0; }
+
+  @media print {
+    .dev-toolbar { display: none; }
+  }
 </style>

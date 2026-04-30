@@ -11,12 +11,12 @@ WITH selected_students AS (
       , students.home_room
     FROM students
 
-        ~[if#portal.~[directory]='admin']
+        ~[if#portal.~[directory]=admin]
          WHERE students.enroll_status = 0
             AND students.schoolid = ~(curschoolid)
         [/if#portal]
 
-         ~[if#portal.~[directory]='teachers']
+         ~[if#portal.~[directory]=teachers]
             INNER JOIN cc ON cc.studentid = students.id
                 AND cc.dateleft >= CURRENT_DATE
             INNER JOIN sections ON sections.id = cc.sectionid
@@ -24,10 +24,10 @@ WITH selected_students AS (
             WHERE students.enroll_status = 0
         [/if#portal]
 
-         ~[if#portal.~[directory]='guardian']
+         ~[if#portal.~[directory]=guardian]
         INNER JOIN GuardianStudent gstu ON gstu.studentsdcid = students.dcid
         INNER JOIN Guardian g ON g.GuardianID = gstu.GuardianID
-            AND g.guardianid = ~[x:userid]
+            AND g.guardianid = ~[x:userid;guardianid]
                                                                     
         WHERE students.enroll_status = 0
         [/if#portal]
