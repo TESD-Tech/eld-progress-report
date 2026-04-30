@@ -1,7 +1,10 @@
-export interface StudentField {
-  key: string | null
-  title: string
+export interface FieldMetadata {
+  title: string | null
   container_title: string | null
+}
+
+export interface StudentField {
+  element_id: string
   value: string | null
 }
 
@@ -21,17 +24,27 @@ export interface Student {
   response: StudentResponse | null
 }
 
+export interface ELDData {
+  metadata: Record<string, FieldMetadata>;
+  students: Student[];
+}
+
+
 const isDev = import.meta.env.DEV
 // In dev: Vite serves public/ under the base path, so use BASE_URL (/eld-progress-report/eld.json)
 // In prod: ./eld.json is relative to the HTML page, which resolves to the PS wildcard next to it
 export const DATA_URL = isDev ? `${import.meta.env.BASE_URL}eld.json` : './eld.json'
 
-export async function loadStudents(): Promise<Student[]> {
+export async function loadELDData(): Promise<ELDData> {
   const r = await fetch(DATA_URL)
   const raw = await r.json()
-  const arr = raw[0]?.FULL_JSON?.data ?? raw.FULL_JSON?.data ?? raw.data ?? raw
-  return arr as Student[]
+  if (raw.metadata && raw.data) {
+    return { metadata: raw.metadata, students: raw.data };
+  }
+  return { metadata: {}, students: raw };
 }
+
+export const loadStudents = loadELDData
 
 export function filterStudents(
   students: Student[],
@@ -51,12 +64,13 @@ export function filterStudents(
   })
 }
 
-export function getDashboardSummary(students: Student[]) {
+export function getDashboardSummary(students: Student[], metadata: Record<string, FieldMetadata>) {
   const withData = students.filter(s => s.response?.fields?.length)
   const progress = withData.map(s => {
-    const fields = (s.response!.fields ?? []).filter(
-      f => f.title === 'Marking Period 1' || f.title === 'Marking Period 2',
-    )
+    const fields = (s.response!.fields ?? []).filter(f => {
+      const title = metadata[f.element_id]?.title
+      return title === 'Marking Period 1' || title === 'Marking Period 2'
+    })
     const meets = fields.filter(f => f.value?.trim() === '✓').length
     return fields.length > 0 ? (meets / fields.length) * 100 : 0
   })

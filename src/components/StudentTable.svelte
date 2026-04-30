@@ -1,11 +1,12 @@
 <script lang="ts">
   import { formatName, formatDate, calculateProgress } from '$lib/utils'
   import ProgressBar from './ProgressBar.svelte'
-  import type { Student } from '$lib/data'
+  import type { Student, FieldMetadata } from '$lib/data'
 
-  let { students = [], portal = 'admin', onSelect, onStudentSelect } = $props<{
+  let { students = [], portal = 'admin', metadata = {}, onSelect, onStudentSelect } = $props<{
     students?: Student[]
     portal?: string
+    metadata?: Record<string, FieldMetadata>
     onSelect?: (selected: Student[]) => void
     onStudentSelect?: (dcid: string) => void
   }>()
@@ -45,7 +46,7 @@
       </thead>
       <tbody>
         {#each students as s}
-          {@const p = s.response?.fields ? calculateProgress(s.response.fields) : null}
+          {@const p = s.response?.fields ? calculateProgress(s.response.fields, metadata) : null}
           <tr>
             <td class="check-col"><input type="checkbox" checked={selected.has(s.student_dcid)} onchange={() => toggleOne(s.student_dcid)} /></td>
             <td>

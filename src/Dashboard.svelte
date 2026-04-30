@@ -1,7 +1,7 @@
 <svelte:options customElement="eld-dashboard" />
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { loadStudents, filterStudents, getDashboardSummary, type Student } from '$lib/data'
+  import { loadELDData, filterStudents, getDashboardSummary, type Student, type FieldMetadata } from '$lib/data'
   import { getUniqueGrades, getUniqueRooms } from '$lib/utils'
   import { printMultipleReports } from '$lib/printUtils'
   import SummaryStats from './components/SummaryStats.svelte'
@@ -16,6 +16,7 @@
   }>()
 
   let students = $state<Student[]>([])
+  let metadata = $state<Record<string, FieldMetadata>>({})
   let loading = $state(true)
   let error = $state<string | null>(null)
   let search = $state('')
@@ -24,13 +25,15 @@
   let selected = $state<Student[]>([])
 
   let filtered = $derived(filterStudents(students, search, grade, room))
-  let summary = $derived(getDashboardSummary(students))
+  let summary = $derived(getDashboardSummary(students, metadata))
   let grades = $derived(getUniqueGrades(students))
   let rooms = $derived(getUniqueRooms(students))
 
   onMount(async () => {
     try {
-      students = await loadStudents()
+      const data = await loadELDData()
+      students = data.students
+      metadata = data.metadata
     } catch (e) {
       error = e instanceof Error ? e.message : 'Failed to load data'
     } finally {
@@ -58,7 +61,7 @@
     <div class="err"><strong>Error:</strong> {error}</div>
   {:else}
      {#if portal !== 'guardian'}
-       <SummaryStats {...summary} />
+       <!-- <SummaryStats {...summary} /> -->
        <div class="filter-row">
          <FilterBar bind:search bind:grade bind:room {grades} {rooms} />
        </div>
@@ -74,7 +77,7 @@
       </div>
     {/if}
 
-    <StudentTable students={filtered} {portal} onSelect={(s) => { selected = s }} {onStudentSelect} />
+    <StudentTable students={filtered} {portal} {metadata} onSelect={(s) => { selected = s }} {onStudentSelect} />
   {/if}
 </div>
 

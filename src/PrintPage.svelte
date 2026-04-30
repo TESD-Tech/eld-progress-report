@@ -1,9 +1,9 @@
 <svelte:options customElement="eld-print-page" />
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { formatName, formatDate, getMetadataFields, getAssessmentLabel, groupAssessmentFields, getMarkingPeriods } from '$lib/utils'
-  import type { Student } from '$lib/data'
-  import { loadStudents } from '$lib/data';
+  import { formatName, formatDate, getMetadataFields, getAssessmentLabel, groupAssessmentFields, getMarkingPeriods, getNarrativeFields } from '$lib/utils'
+  import type { Student, FieldMetadata } from '$lib/data'
+  import { loadELDData } from '$lib/data';
   import Legend from './components/Legend.svelte';
 
   let { studentDcids = [], onNavigate } = $props<{
@@ -12,13 +12,15 @@
   }>()
 
   let students = $state<Student[]>([])
+  let metadata = $state<Record<string, FieldMetadata>>({})
   let error = $state<string | null>(null)
 
   onMount(async () => {
     try {
       if (studentDcids && studentDcids.length) {
-        const all = await loadStudents();
-        students = all.filter(stu => studentDcids.includes(stu.student_dcid));
+        const data = await loadELDData();
+        students = data.students.filter(stu => studentDcids.includes(stu.student_dcid));
+        metadata = data.metadata;
         if (students.length === 0) error = 'No students found for printing.';
       } else {
         error = 'No students selected for printing.';
@@ -58,7 +60,7 @@
           <span>{formatDate(student.response?.submitted_at)}</span>
         </div>
         {#if student.response?.fields}
-          {@const meta = getMetadataFields(student.response.fields)}
+          {@const meta = getMetadataFields(student.response.fields, metadata)}
           {#if meta['Proficiency Level'] || meta['Current English Proficiency Level']}
             <div class="meta-row">
               <strong>Proficiency:</strong> {meta['Proficiency Level'] ?? meta['Current English Proficiency Level']}
@@ -73,8 +75,8 @@
       </div>
 
       {#if student.response?.fields}
-        {@const grouped = groupAssessmentFields(student.response.fields)}
-        {@const periods = getMarkingPeriods(student.response.fields)}
+        {@const grouped = groupAssessmentFields(student.response.fields, metadata)}
+        {@const periods = getMarkingPeriods(student.response.fields, metadata)}
         {@const skills = Array.from(grouped.keys())}
         {#if skills.length > 0}
           <Legend />
@@ -102,6 +104,18 @@
             </tbody>
           </table>
           <Legend />
+        {/if}
+        {@const narratives = getNarrativeFields(student.response.fields, metadata)}
+        {#if narratives.length > 0}
+          <div class="narratives">
+            <h3>Teacher Comments</h3>
+            {#each narratives as n}
+              <div class="narrative-block">
+                <div class="narrative-label">{n.title}</div>
+                <p class="narrative-text">{n.value}</p>
+              </div>
+            {/each}
+          </div>
         {/if}
       {:else}
         <p class="no-data">No assessment data available.</p>
@@ -177,6 +191,12 @@
   .val-exceeds { background: #e3f2fd; color: #0d47a1; }
   .val-empty { background: #fafafa; color: #bbb; }
 
+  .narratives { margin-top: 16px; }
+  .narratives h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: #555; margin: 0 0 10px; }
+  .narrative-block { margin-bottom: 12px; }
+  .narrative-block:last-child { margin-bottom: 0; }
+  .narrative-label { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: #999; margin-bottom: 2px; }
+  .narrative-text { margin: 0; font-size: 12px; color: #333; line-height: 1.5; }
   .no-data { color: #aaa; font-size: 13px; }
   .print-error {
     padding: 24px;

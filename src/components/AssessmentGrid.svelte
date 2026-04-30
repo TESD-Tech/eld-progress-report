@@ -1,11 +1,14 @@
 <script lang="ts">
   import { groupAssessmentFields, getMarkingPeriods, getAssessmentLabel } from '$lib/utils'
-  import type { StudentField } from '$lib/data'
+  import type { StudentField, FieldMetadata } from '$lib/data'
 
-  let { fields = [] } = $props<{ fields?: StudentField[] }>()
+  let { fields = [], metadata = {} } = $props<{
+    fields?: StudentField[]
+    metadata?: Record<string, FieldMetadata>
+  }>()
 
-  let grouped = $derived(groupAssessmentFields(fields))
-  let periods = $derived(getMarkingPeriods(fields))
+  let grouped = $derived(groupAssessmentFields(fields, metadata))
+  let periods = $derived(getMarkingPeriods(fields, metadata))
   let skills = $derived(Array.from(grouped.keys()))
 </script>
 

@@ -1,4 +1,4 @@
-import type { Student, StudentField } from './data'
+import type { Student, StudentField, FieldMetadata } from './data'
 
 export function formatName(student: Student): string {
   return `${student.first_name || ''} ${student.last_name || ''}`.trim() || 'Unknown Student'
@@ -17,16 +17,17 @@ export function formatDate(dateString: string | null | undefined): string {
   }
 }
 
-export function calculateProgress(fields: StudentField[]): {
+export function calculateProgress(fields: StudentField[], metadata: Record<string, FieldMetadata>): {
   meets: number
   approaching: number
   below: number
   total: number
   percent: number
 } {
-  const assessment = fields.filter(
-    f => f.title === 'Marking Period 1' || f.title === 'Marking Period 2',
-  )
+  const assessment = fields.filter(f => {
+    const title = metadata[f.element_id]?.title
+    return title === 'Marking Period 1' || title === 'Marking Period 2'
+  })
   let meets = 0,
     approaching = 0,
     below = 0
@@ -48,22 +49,26 @@ export function calculateProgress(fields: StudentField[]): {
 
 export function groupAssessmentFields(
   fields: StudentField[],
+  metadata: Record<string, FieldMetadata>,
 ): Map<string, Map<string, string>> {
   const result = new Map<string, Map<string, string>>()
   for (const f of fields) {
-    if (!f.container_title || !f.title) continue
-    if (f.title !== 'Marking Period 1' && f.title !== 'Marking Period 2') continue
-    if (!result.has(f.container_title)) result.set(f.container_title, new Map())
-    result.get(f.container_title)!.set(f.title, f.value ?? '')
+    const title = metadata[f.element_id]?.title
+    const container_title = metadata[f.element_id]?.container_title
+    if (!container_title || !title) continue
+    if (title !== 'Marking Period 1' && title !== 'Marking Period 2') continue
+    if (!result.has(container_title)) result.set(container_title, new Map())
+    result.get(container_title)!.set(title, f.value ?? '')
   }
   return result
 }
 
-export function getMarkingPeriods(fields: StudentField[]): string[] {
+export function getMarkingPeriods(fields: StudentField[], metadata: Record<string, FieldMetadata>): string[] {
   const periods = new Set<string>()
   for (const f of fields) {
-    if (f.title === 'Marking Period 1' || f.title === 'Marking Period 2') {
-      periods.add(f.title)
+    const title = metadata[f.element_id]?.title
+    if (title === 'Marking Period 1' || title === 'Marking Period 2') {
+      periods.add(title)
     }
   }
   return Array.from(periods).sort()
@@ -85,11 +90,30 @@ export function getUniqueRooms(students: Student[]): string[] {
 
 const METADATA_TITLES = ['Proficiency Level', 'ELD Teacher', 'Current English Proficiency Level']
 
-export function getMetadataFields(fields: StudentField[]): Record<string, string> {
+// Titles that are form header scaffolding, not meaningful narrative content
+const SKIP_TITLES = new Set(['Student', 'School', ...METADATA_TITLES])
+
+export function getNarrativeFields(
+  fields: StudentField[],
+  metadata: Record<string, FieldMetadata>,
+): { title: string; value: string }[] {
+  const result: { title: string; value: string }[] = []
+  for (const f of fields) {
+    const { title, container_title } = metadata[f.element_id] ?? {}
+    if (!title || container_title !== null) continue
+    if (SKIP_TITLES.has(title)) continue
+    if (!f.value?.trim()) continue
+    result.push({ title, value: f.value.trim() })
+  }
+  return result.sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true }))
+}
+
+export function getMetadataFields(fields: StudentField[], metadata: Record<string, FieldMetadata>): Record<string, string> {
   const result: Record<string, string> = {}
   for (const f of fields) {
-    if (METADATA_TITLES.includes(f.title) && f.value) {
-      result[f.title] = f.value
+    const title = metadata[f.element_id]?.title
+    if (title && METADATA_TITLES.includes(title) && f.value) {
+      result[title] = f.value
     }
   }
   return result

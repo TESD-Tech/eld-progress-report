@@ -1,8 +1,8 @@
 <svelte:options customElement="eld-report" />
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { loadStudents, type Student } from '$lib/data'
-  import { formatName, formatDate, calculateProgress, getMetadataFields } from '$lib/utils'
+  import { loadELDData, type Student, type FieldMetadata } from '$lib/data'
+  import { formatName, formatDate, calculateProgress, getMetadataFields, getNarrativeFields } from '$lib/utils'
   import { printReport } from '$lib/printUtils'
   import AssessmentGrid from './components/AssessmentGrid.svelte'
   import DebugBar from './components/DebugBar.svelte'
@@ -15,6 +15,7 @@
   }>()
 
   let student = $state<Student | null>(null)
+  let metadata = $state<Record<string, FieldMetadata>>({})
   let loading = $state(true)
   let error = $state<string | null>(null)
 
@@ -25,8 +26,9 @@
       return
     }
     try {
-      const students = await loadStudents()
-      student = students.find(s => s.student_dcid === student_dcid) ?? null
+      const data = await loadELDData()
+      student = data.students.find(s => s.student_dcid === student_dcid) ?? null
+      metadata = data.metadata
       if (!student) error = 'Student not found.'
     } catch (e) {
       error = e instanceof Error ? e.message : 'Failed to load data'
@@ -57,14 +59,14 @@
         <div><span class="label">Home Room</span><span class="val">{student.home_room || '—'}</span></div>
         <div><span class="label">Assessment Date</span><span class="val">{formatDate(student.response?.submitted_at)}</span></div>
         {#if student.response?.fields}
-          {@const p = calculateProgress(student.response.fields)}
+          {@const p = calculateProgress(student.response.fields, metadata)}
           {#if p.total > 0}
             <div>
               <span class="label">Overall Progress</span>
               <span class="val">{p.percent}% ({p.meets}/{p.total} skills meeting expectations)</span>
             </div>
           {/if}
-          {@const meta = getMetadataFields(student.response.fields)}
+          {@const meta = getMetadataFields(student.response.fields, metadata)}
           {#if meta['Proficiency Level']}
             <div><span class="label">Proficiency Level</span><span class="val">{meta['Proficiency Level']}</span></div>
           {/if}
@@ -78,7 +80,23 @@
       </div>
     </div>
 
-    <AssessmentGrid fields={student.response?.fields ?? []} />
+
+    {#if student.response?.fields}
+      {@const narratives = getNarrativeFields(student.response.fields, metadata)}
+      {#if narratives.length > 0}
+        <div class="narratives">
+          <h2>Teacher Comments</h2>
+          {#each narratives as n}
+            <div class="narrative-block">
+              <div class="narrative-label">{n.title}</div>
+              <p class="narrative-text">{n.value}</p>
+            </div>
+          {/each}
+        </div>
+      {/if}
+    {/if}
+
+    <AssessmentGrid fields={student.response?.fields ?? []} {metadata} />
 
     <div class="print-row">
       <button onclick={() => onPrint?.(student!.student_dcid)}>Print Report</button>
@@ -147,6 +165,24 @@
   .meta-grid div { display: flex; flex-direction: column; gap: 3px; }
   .label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: #888; }
   .val { font-weight: 600; font-size: 14px; color: #333; }
+  .narratives {
+    background: white;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 2px 4px rgba(0,0,0,.08);
+    margin-top: 24px;
+  }
+  .narratives h2 { margin: 0 0 16px; font-size: 18px; color: #333; }
+  .narrative-block { margin-bottom: 16px; }
+  .narrative-block:last-child { margin-bottom: 0; }
+  .narrative-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #888;
+    margin-bottom: 4px;
+  }
+  .narrative-text { margin: 0; font-size: 14px; color: #333; line-height: 1.6; }
   .print-row { text-align: center; margin-top: 24px; }
   .print-row button {
     padding: 10px 24px;

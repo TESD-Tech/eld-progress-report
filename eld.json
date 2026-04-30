@@ -1,0 +1,137 @@
+~[tlist_sql;
+WITH selected_students AS (
+    -- Filters students based on active enrollments
+    SELECT DISTINCT 
+        students.id
+      , students.student_number
+      , students.dcid AS student_dcid
+      , students.first_name
+      , students.last_name
+      , students.grade_level
+      , students.home_room
+    FROM students
+
+        ~[if#portal.~[directory]=admin]
+         WHERE students.enroll_status = 0
+            AND ( students.schoolid = ~(curschoolid) OR 0 = ~(curschoolid) )
+        [/if#portal]
+
+         ~[if#portal.~[directory]=teachers]
+            INNER JOIN cc ON cc.studentid = students.id
+                AND cc.dateleft >= CURRENT_DATE
+            INNER JOIN sections ON sections.id = cc.sectionid
+                AND sections.teacherid = ~[x:userid]                                                            
+            WHERE students.enroll_status = 0
+        [/if#portal]
+
+         ~[if#portal.~[directory]=guardian]
+        INNER JOIN GuardianStudent gstu ON gstu.studentsdcid = students.dcid
+        INNER JOIN Guardian g ON g.GuardianID = gstu.GuardianID
+            AND g.guardianid = ~[x:userid;guardianid]
+                                                                    
+        WHERE students.enroll_status = 0
+        [/if#portal]
+)
+, latest_form_responses AS (
+    -- Gets the most recent response per student for the specific form title
+    SELECT
+        u_fb_form_response.student_id
+      , u_fb_form_response.u_fb_form_id AS form_id
+      , MAX(u_fb_form_response.id) AS response_id
+    FROM u_fb_form_response
+    INNER JOIN u_fb_form ON u_fb_form.id = u_fb_form_response.u_fb_form_id
+    WHERE u_fb_form.form_title LIKE 'Elementary English Language Development Evaluation%'
+      AND u_fb_form.publish IN ('true', 'Scheduled')
+    GROUP BY 
+        u_fb_form_response.student_id
+      , u_fb_form_response.u_fb_form_id
+)
+, metadata_lookup AS (
+    -- Generates a single lookup object for titles using the element ID as the key
+    -- This prevents ORA-40595 because IDs are never null
+    SELECT
+        JSON_OBJECTAGG(
+            TO_CHAR(u_fb_form_element.id) VALUE JSON_OBJECT(
+                'title'           VALUE u_fb_form_element.title
+              , 'container_title' VALUE u_fb_form_element_container.title
+              RETURNING CLOB
+            )
+            RETURNING CLOB
+        ) AS field_metadata
+    FROM u_fb_form_element
+    INNER JOIN u_fb_form ON u_fb_form.id = u_fb_form_element.u_fb_form_id
+    LEFT OUTER JOIN u_fb_form_element u_fb_form_element_container 
+        ON u_fb_form_element_container.id = u_fb_form_element.containerid
+    WHERE u_fb_form.form_title LIKE 'Elementary English Language Development Evaluation%'
+      AND u_fb_form_element.ELEMENT_TYPE != 'sbscontainer'
+)
+, response_details AS (
+    -- Joins the latest response with value and the element ID for looking up metadata
+    SELECT
+        latest_form_responses.student_id
+      , latest_form_responses.form_id
+      , latest_form_responses.response_id
+      , u_fb_form_response.whencreated AS submitted_at
+      , JSON_ARRAYAGG(
+            JSON_OBJECT(
+                'element_id' VALUE TO_CHAR(u_fb_form_element.id)
+              , 'value'      VALUE u_fb_form_response_detail.response_value
+              RETURNING CLOB
+            )
+            RETURNING CLOB
+        ) AS fields_json
+    FROM latest_form_responses
+    INNER JOIN u_fb_form_response 
+        ON u_fb_form_response.id = latest_form_responses.response_id
+    INNER JOIN u_fb_form_response_element 
+        ON u_fb_form_response_element.u_fb_form_response_id = u_fb_form_response.id
+    INNER JOIN u_fb_form_element 
+        ON u_fb_form_element.id = u_fb_form_response_element.u_fb_form_element_id
+        AND u_fb_form_element.ELEMENT_TYPE != 'sbscontainer'
+    INNER JOIN u_fb_form_response_detail 
+        ON u_fb_form_response_detail.u_fb_form_response_element_id = u_fb_form_response_element.id
+    GROUP BY 
+        latest_form_responses.student_id
+      , latest_form_responses.form_id
+      , latest_form_responses.response_id
+      , u_fb_form_response.whencreated
+)
+, student_json_payload AS (
+    -- Aggregates students and their responses into individual objects
+    SELECT
+        JSON_ARRAYAGG(
+            JSON_OBJECT(
+                'student_dcid'   VALUE TO_CHAR(selected_students.student_dcid)
+              , 'student_number' VALUE selected_students.student_number
+              , 'first_name'     VALUE selected_students.first_name
+              , 'last_name'      VALUE selected_students.last_name
+              , 'grade_level'    VALUE selected_students.grade_level
+              , 'home_room'      VALUE selected_students.home_room
+              , 'response'       VALUE (
+                    CASE 
+                        WHEN response_details.response_id IS NOT NULL THEN
+                            JSON_OBJECT(
+                                'id'           VALUE TO_CHAR(response_details.response_id)
+                              , 'submitted_at' VALUE TO_CHAR(response_details.submitted_at, 'YYYY-MM-DD"T"HH24' || CHR(58) || 'MI' || CHR(58) || 'SS"Z"')
+                              , 'fields'       VALUE TREAT(response_details.fields_json AS JSON)
+                              RETURNING CLOB
+                            )
+                        ELSE NULL 
+                    END
+                )
+              RETURNING CLOB
+            )
+            RETURNING CLOB
+        ) AS students_array
+    FROM selected_students
+    INNER JOIN response_details ON response_details.student_id = selected_students.id
+)
+-- Final Output
+SELECT
+    JSON_OBJECT(
+        'metadata' VALUE TREAT(metadata_lookup.field_metadata AS JSON)
+      , 'data'     VALUE TREAT(COALESCE(student_json_payload.students_array, TO_CLOB(CHR(91) || CHR(93))) AS JSON)
+        RETURNING CLOB
+    ) AS full_json
+FROM student_json_payload
+CROSS JOIN metadata_lookup;]~(json)[/tlist_sql]
