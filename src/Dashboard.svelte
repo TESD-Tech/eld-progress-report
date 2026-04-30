@@ -42,7 +42,9 @@
   <header class="eld-header">
     <h1>ELD Progress Report</h1>
     <p class="subtitle">
-      {portal === 'admin' ? 'Administrative Dashboard — All Students' : 'Teacher Dashboard — My Students'}
+      {portal === 'admin' ? 'Administrative Dashboard — All Students'                                                                       
+        : portal === 'guardian' ? `Guardian View — Your ${students.length > 1 ? 'Children' : 'Child'}`                                      
+        : 'Teacher Dashboard — My Students'}
     </p>
   </header>
 
@@ -54,11 +56,14 @@
   {:else if error}
     <div class="err"><strong>Error:</strong> {error}</div>
   {:else}
-    <SummaryStats {...summary} />
+     {#if portal !== 'guardian'}
+       <SummaryStats {...summary} />
+       <div class="filter-row">
+         <FilterBar bind:search bind:grade bind:room {grades} {rooms} />
+       </div>
+     {/if}
+    
 
-    <div class="filter-row">
-      <FilterBar bind:search bind:grade bind:room {grades} {rooms} />
-    </div>
 
     {#if selected.length > 0}
       <div class="print-bar">

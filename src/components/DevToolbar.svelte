@@ -88,7 +88,7 @@
         </div>
       {/if}
 
-      <button class="go-btn" onclick={navigate}>Go</button>
+      <button class="go-btn" >Go</button>
     </div>
   {/if}
 </div>

@@ -37,7 +37,9 @@
           <th>Grade</th>
           <th>Room</th>
           <th>Last Assessment</th>
-          <th>Progress</th>
+          {#if portal !== 'guardian'}
+            <th>Progress</th>
+          {/if}
           <th>Actions</th>
         </tr>
       </thead>
@@ -53,13 +55,15 @@
             <td>{s.grade_level ?? '—'}</td>
             <td>{s.home_room || '—'}</td>
             <td>{formatDate(s.response?.submitted_at)}</td>
-            <td>
-              {#if p && p.total > 0}
-                <ProgressBar percent={p.percent} meets={p.meets} total={p.total} />
-              {:else}
-                <span class="na">No data</span>
-              {/if}
-            </td>
+            {#if portal !== 'guardian'}
+              <td>
+                {#if p && p.total > 0}
+                  <ProgressBar percent={p.percent} meets={p.meets} total={p.total} />
+                {:else}
+                  <span class="na">No data</span>
+                {/if}
+              </td>
+            {/if}
             <td>
               <button class="btn" onclick={() => onStudentSelect?.(s.student_dcid)}>View Report</button>
             </td>

@@ -1,8 +1,14 @@
 <script lang="ts">
   import { onMount } from 'svelte';
 
+  let { onPortalChange } = $props<{ onPortalChange?: (portal: string) => void }>();
+
   let isOpen = $state(false);
-  let selectedRole = $state('admin');
+  let selectedRole = $state(
+    typeof window !== 'undefined'
+      ? (new URLSearchParams(window.location.search).get('portal') || 'admin')
+      : 'admin'
+  );
   let selectedView = $state('dashboard');
   let selectedStudentDcid = $state('42318');
   let searchStudent = $state('');
@@ -24,7 +30,8 @@
   });
 
   function navigateToView() {
-    const params = selectedView === 'report' || selectedView === 'print' 
+    onPortalChange?.(selectedRole);
+    const params = selectedView === 'report' || selectedView === 'print'
       ? { student_dcid: selectedStudentDcid }
       : {};
     
@@ -35,7 +42,8 @@
       // Fallback - construct URL manually
       const url = new URL(window.location.href);
       url.searchParams.set('view', selectedView);
-      
+      url.searchParams.set('portal', selectedRole);
+
       if (selectedView === 'report' || selectedView === 'print') {
         url.searchParams.set('student_dcid', selectedStudentDcid);
       } else {
@@ -61,6 +69,12 @@
   let context = $state(getCurrentContext());
 
   onMount(() => {
+    // Restore portal selection from URL on mount (survives full-page reloads)
+    const urlPortal = new URLSearchParams(window.location.search).get('portal');
+    if (urlPortal) {
+      onPortalChange?.(urlPortal);
+    }
+
     // Update context when URL changes
     const updateContext = () => {
       context = getCurrentContext();

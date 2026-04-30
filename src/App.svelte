@@ -9,7 +9,7 @@
     userType,
     userRole,
     usertype,
-    portal = 'admin',
+    portal: portalProp = 'admin',
     'user-type': userTypeAttr,
     'user-role': userRoleAttr,
     'year-id': yearIdAttr,
@@ -25,6 +25,7 @@
 
   let loading = $state(true);
   let error = $state(false);
+  let debugPortal = $state<string | null>(null);
 
   const fallbackConfig = {
     yearId: new Date().getFullYear().toString()
@@ -41,11 +42,11 @@
     }
   }
 
-  const effectiveUserType = $derived(() => {
-    return userType || usertype || userTypeAttr || userRole || userRoleAttr || portal || 'admin';
+  const effectiveUserType = $derived.by(() => {
+    return debugPortal || userType || usertype || userTypeAttr || userRole || userRoleAttr || portalProp || 'admin';
   });
 
-  const effectiveYearId = $derived(() => {
+  const effectiveYearId = $derived.by(() => {
     return yearIdAttr || fallbackConfig.yearId;
   });
 
@@ -72,10 +73,10 @@
       Error loading configuration.
     </p>
   {:else}
-    <EldLayout userRole={effectiveUserType()} yearId={effectiveYearId()} />
+    <EldLayout userRole={effectiveUserType} yearId={effectiveYearId} />
   {/if}
   {#if import.meta.env.DEV}
-    <DebugToolbar />
+    <DebugToolbar onPortalChange={(p: string) => { debugPortal = p }} />
   {/if}
 </main>
 

@@ -10,11 +10,29 @@ WITH selected_students AS (
       , students.grade_level
       , students.home_room
     FROM students
-    INNER JOIN cc ON cc.studentid = students.id
-        AND cc.dateleft >= CURRENT_DATE
-    INNER JOIN sections ON sections.id = cc.sectionid
-    -- Add teacher filtering here if needed:
-    -- AND sections.teacherid = ~[x:userid]
+
+        ~[if#portal.~[directory]='admin']
+         WHERE students.enroll_status = 0
+            AND students.schoolid = ~(curschoolid)
+        [/if#portal]
+
+         ~[if#portal.~[directory]='teachers']
+            INNER JOIN cc ON cc.studentid = students.id
+                AND cc.dateleft >= CURRENT_DATE
+            INNER JOIN sections ON sections.id = cc.sectionid
+                AND sections.teacherid = ~[x:userid]                                                           
+            WHERE students.enroll_status = 0
+        [/if#portal]
+
+         ~[if#portal.~[directory]='guardian']
+        INNER JOIN GuardianStudent gstu ON gstu.studentsdcid = students.dcid
+        INNER JOIN Guardian g ON g.GuardianID = gstu.GuardianID
+            AND g.guardianid = ~[x:userid]
+                                                                    
+        WHERE students.enroll_status = 0
+        [/if#portal]
+
+     
 )
 , latest_form_responses AS (
     -- Gets the most recent response per student for the specific form title
