@@ -9,9 +9,10 @@
   import StudentTable from './components/StudentTable.svelte'
   import DebugBar from './components/DebugBar.svelte'
 
-  let { portal = 'admin', onStudentSelect } = $props<{
+  let { portal = 'admin', onStudentSelect, onPrintSelected } = $props<{
     portal?: string
     onStudentSelect?: (dcid: string) => void
+    onPrintSelected?: (dcids: string[]) => void
   }>()
 
   let students = $state<Student[]>([])
@@ -68,7 +69,7 @@
     {#if selected.length > 0}
       <div class="print-bar">
         <span>{selected.length} student{selected.length === 1 ? '' : 's'} selected</span>
-        <button onclick={() => printMultipleReports(selected)}>Print Selected</button>
+        <button onclick={() => onPrintSelected?.(selected.map(s => s.student_dcid))}>Print Selected</button>
         <button class="clear-btn" onclick={() => { selected = [] }}>Clear</button>
       </div>
     {/if}

@@ -7,10 +7,11 @@
   import AssessmentGrid from './components/AssessmentGrid.svelte'
   import DebugBar from './components/DebugBar.svelte'
 
-  let { portal = 'admin', student_dcid = '', onBack } = $props<{
+  let { portal = 'admin', student_dcid = '', onBack, onPrint } = $props<{
     portal?: string
     student_dcid?: string
     onBack?: () => void
+    onPrint?: (dcid: string) => void
   }>()
 
   let student = $state<Student | null>(null)
@@ -80,7 +81,7 @@
     <AssessmentGrid fields={student.response?.fields ?? []} />
 
     <div class="print-row">
-      <button onclick={() => printReport(student!)}>Print Report</button>
+      <button onclick={() => onPrint?.(student!.student_dcid)}>Print Report</button>
     </div>
   {/if}
 </div>
@@ -91,7 +92,7 @@
 
 <style>
   :host { display: block; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-  .eld { max-width: 1000px; margin: 0 auto; padding: 20px; background: #f5f5f5; min-height: 100vh; box-sizing: border-box; }
+  .eld { max-width: 1200px; margin: 0 auto; padding: 20px; background: #f5f5f5; min-height: 100vh; box-sizing: border-box; }
   .breadcrumb { margin-bottom: 16px; }
   .back-btn {
     background: none;

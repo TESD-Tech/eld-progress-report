@@ -3,38 +3,46 @@
   import { onMount } from 'svelte'
   import { formatName, formatDate, getMetadataFields, getAssessmentLabel, groupAssessmentFields, getMarkingPeriods } from '$lib/utils'
   import type { Student } from '$lib/data'
+  import { loadStudents } from '$lib/data';
+  import Legend from './components/Legend.svelte';
 
-  let { student_dcid = '', onNavigate } = $props<{
-    student_dcid?: string
-    onNavigate?: (view: string, params?: Record<string, string>) => void
+  let { studentDcids = [], onNavigate } = $props<{
+    studentDcids?: string[];
+    onNavigate?: (view: string, params?: Record<string, string>) => void;
   }>()
 
   let students = $state<Student[]>([])
   let error = $state<string | null>(null)
 
-  onMount(() => {
+  onMount(async () => {
     try {
-      const params = new URLSearchParams(location.search)
-      let raw: string | null = null
-      if (params.get('src') === 'session') {
-        raw = sessionStorage.getItem('eld_print_data')
-        if (!raw) throw new Error('No print data found in sessionStorage')
+      if (studentDcids && studentDcids.length) {
+        const all = await loadStudents();
+        students = all.filter(stu => studentDcids.includes(stu.student_dcid));
+        if (students.length === 0) error = 'No students found for printing.';
       } else {
-        raw = params.get('data')
-        if (!raw) throw new Error('No data parameter in URL')
+        error = 'No students selected for printing.';
       }
-      students = JSON.parse(raw)
     } catch (e) {
-      error = e instanceof Error ? e.message : 'Failed to load print data'
-      return
+      error = e instanceof Error ? e.message : 'Failed to load print data';
+      return;
     }
-    setTimeout(() => window.print(), 300)
-  })
+    let didPrint = false;
+    setTimeout(() => {
+      if (!didPrint) {
+        window.print();
+        didPrint = true;
+      }
+    }, 300);
+  });
 </script>
 
 {#if error}
   <div class="print-error">{error}</div>
 {:else}
+  <div class="print-back-row">
+    <button class="print-back" onclick={() => onNavigate?.()}>← Back</button>
+  </div>
   {#each students as student, i}
     <div class="page" class:page-break={i < students.length - 1}>
       <div class="page-header">
@@ -71,6 +79,7 @@
         {@const periods = getMarkingPeriods(student.response.fields)}
         {@const skills = Array.from(grouped.keys())}
         {#if skills.length > 0}
+          <Legend />
           <table class="assessment-table">
             <thead>
               <tr>
@@ -90,21 +99,15 @@
                     <td class="cell {lbl.cssClass}" title={lbl.meaning}>{lbl.symbol}</td>
                   {/each}
                 </tr>
+
               {/each}
             </tbody>
           </table>
+          <Legend />
         {/if}
       {:else}
         <p class="no-data">No assessment data available.</p>
       {/if}
-
-      <div class="legend">
-        <span class="val-meets">✓</span> Meets &nbsp;
-        <span class="val-approaching">●</span> Approaching &nbsp;
-        <span class="val-below">/</span> Below &nbsp;
-        <span class="val-exceeds">+</span> Exceeds &nbsp;
-        <span class="val-empty">—</span> Not Yet Assessed
-      </div>
     </div>
   {/each}
 {/if}
@@ -157,7 +160,6 @@
   .assessment-table th, .assessment-table td {
     padding: 7px 10px;
     border: 1px solid #ddd;
-    text-align: left;
   }
   .assessment-table th {
     background: #f5f5f5;
@@ -177,14 +179,6 @@
   .val-exceeds { background: #e3f2fd; color: #0d47a1; }
   .val-empty { background: #fafafa; color: #bbb; }
 
-  .legend {
-    font-size: 12px;
-    color: #666;
-    border-top: 1px solid #eee;
-    padding-top: 8px;
-  }
-  .legend span { font-weight: 700; }
-
   .no-data { color: #aaa; font-size: 13px; }
   .print-error {
     padding: 24px;
@@ -197,4 +191,27 @@
     .page { padding: 0; max-width: none; }
     .page-break { page-break-after: always; }
   }
+.print-back-row {
+  max-width: 800px;
+  display: inline;
+  /* margin: 0 auto 12px auto; */
+  text-align: left;
+}
+.print-back {
+  background: none;
+  border: none;
+  color: #1976d2;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+.print-back:hover {
+  color: #125699;
+}
+
+@media print {
+  .print-back-row { display: none; }
+  .print-back { display: none; }
+}
 </style>
