@@ -1,6 +1,7 @@
 <script lang="ts">
   import { groupAssessmentFields, getMarkingPeriods, getAssessmentLabel } from '$lib/utils'
   import type { StudentField, FieldMetadata } from '$lib/data'
+  import Legend from './Legend.svelte'
 
   let { fields = [], metadata = {} } = $props<{
     fields?: StudentField[]
@@ -15,16 +16,11 @@
 <div class="grid-wrap">
   <h2>Assessment Results</h2>
 
-  <div class="legend">
-    <span class="l-meets">✓</span> Meets &nbsp;&nbsp;
-    <span class="l-approaching">●</span> Approaching &nbsp;&nbsp;
-    <span class="l-below">/</span> Below &nbsp;&nbsp;
-    <span class="l-empty">—</span> Not Yet Assessed
-  </div>
-
+  
   {#if skills.length === 0}
-    <p class="empty">No assessment data available for this student.</p>
+  <p class="empty">No assessment data available for this student.</p>
   {:else}
+  <Legend />
     <div class="table-wrap">
       <table>
         <thead>
@@ -49,6 +45,7 @@
         </tbody>
       </table>
     </div>
+    <Legend />
   {/if}
 </div>
 
@@ -60,14 +57,7 @@
     box-shadow: 0 2px 4px rgba(0,0,0,.08);
   }
   h2 { margin: 0 0 16px; font-size: 18px; color: #333; }
-  .legend {
-    font-size: 13px;
-    color: #555;
-    margin-bottom: 20px;
-    padding: 12px 16px;
-    background: #f8f8f8;
-    border-radius: 6px;
-  }
+
   .l-meets { color: #388e3c; font-weight: 700; }
   .l-approaching { color: #f57c00; font-weight: 700; }
   .l-below { color: #d32f2f; font-weight: 700; }

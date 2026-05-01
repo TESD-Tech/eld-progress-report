@@ -1,8 +1,8 @@
 /**
- * redact-names.js
+ * redact-names.cjs
  * * A utility script to scrub sensitive names from JSON files
  * and output a beautified version.
- * * Usage: node redact-names.js <input-file> [output-file]
+ * * Usage: node redact-names.cjs <input-file> [output-file]
  */
 
 const fs = require('fs');
@@ -59,34 +59,59 @@ function getRandomFunName() {
 
 /**
  * Recursively traverses a JSON object to redact specific keys.
+ * Also performs context-aware replacement for names found in strings.
  * @param {any} data - The piece of data to process.
+ * @param {Array} replacements - List of { search, replace } pairs from parent context.
  * @returns {any} The redacted data.
  */
-function redactData(data) {
-  // Handle Arrays
-  if (Array.isArray(data)) {
-    return data.map(item => redactData(item));
+function redactData(data, replacements = []) {
+  // 1. Handle Strings (Apply context-aware replacements)
+  if (typeof data === 'string') {
+    let result = data;
+    for (const { search, replace } of replacements) {
+      if (!search) continue;
+      // Escape special characters for Regex
+      const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(escaped, 'g');
+      result = result.replace(regex, replace);
+    }
+    return result;
   }
 
-  // Handle Objects
-  if (data !== null && typeof data === 'object') {
-    return Object.keys(data).reduce((acc, key) => {
-      const value = data[key];
+  // 2. Handle Arrays
+  if (Array.isArray(data)) {
+    return data.map(item => redactData(item, replacements));
+  }
 
-      if (key === 'first_name') {
-        acc[key] = getRandomFunName();
+  // 3. Handle Objects
+  if (data !== null && typeof data === 'object') {
+    const currentReplacements = [...replacements];
+    let newFirstName = null;
+
+    // Check if this object contains a first_name to redact
+    if (typeof data.first_name === 'string') {
+      newFirstName = getRandomFunName();
+      // Add this name pair to the replacement context for all children of this object
+      currentReplacements.push({ 
+        search: data.first_name, 
+        replace: newFirstName 
+      });
+    }
+
+    return Object.keys(data).reduce((acc, key) => {
+      if (key === 'first_name' && newFirstName) {
+        acc[key] = newFirstName;
       } else if (key === 'last_name') {
         acc[key] = 'Tester';
       } else {
-        // Deeply process nested objects or arrays
-        acc[key] = redactData(value);
+        // Process child fields with the current replacement context
+        acc[key] = redactData(data[key], currentReplacements);
       }
-
       return acc;
     }, {});
   }
 
-  // Return primitives (strings, numbers, booleans, null) as-is
+  // Return primitives as-is
   return data;
 }
 
@@ -98,12 +123,11 @@ function main() {
 
   if (!inputPath) {
     console.error('Error: Please provide an input file path.');
-    console.log('Usage: node redact-names.js <path/to/input.json> [output.json]');
+    console.log('Usage: node redact-names.cjs <path/to/input.json> [output.json]');
     process.exit(1);
   }
 
   try {
-    // 1. Read and parse the file
     const absolutePath = path.resolve(inputPath);
     if (!fs.existsSync(absolutePath)) {
       throw new Error(`File not found: ${absolutePath}`);
@@ -112,13 +136,10 @@ function main() {
     const rawData = fs.readFileSync(absolutePath, 'utf8');
     const jsonContent = JSON.parse(rawData);
 
-    // 2. Process the data
     const processedData = redactData(jsonContent);
 
-    // 3. Stringify with 2-space indentation (beautify)
     const outputString = JSON.stringify(processedData, null, 2);
 
-    // 4. Output to file or stdout
     if (outputPath) {
       fs.writeFileSync(path.resolve(outputPath), outputString);
       console.log(`Success! Redacted JSON saved to: ${outputPath}`);
@@ -132,7 +153,6 @@ function main() {
   }
 }
 
-// Ensure the script runs only when executed directly
 if (require.main === module) {
   main();
 }

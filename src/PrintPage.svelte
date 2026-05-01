@@ -44,7 +44,7 @@
 {:else}
   <button class="print-back-floating" onclick={() => onNavigate?.()}><span class="arrow">←</span><span class="back-text">Back</span></button>
   {#each students as student, i}
-    <div class="page" class:page-break={i < students.length - 1}>
+    <div class="page" class:page-break={i < students.length - 1} class:page-even={i % 2 === 0} class:page-odd={i % 2 !== 0}>
       <div class="page-header">
         <h1>ELD Progress Report</h1>
       </div>
@@ -78,6 +78,18 @@
         {@const grouped = groupAssessmentFields(student.response.fields, metadata)}
         {@const periods = getMarkingPeriods(student.response.fields, metadata)}
         {@const skills = Array.from(grouped.keys())}
+        {@const narratives = getNarrativeFields(student.response.fields, metadata)}
+        {#if narratives.length > 0}
+          <div class="narratives">
+            <h3>Teacher Comments</h3>
+            {#each narratives as n}
+              <div class="narrative-block">
+                <div class="narrative-label">{n.title}</div>
+                <p class="narrative-text">{n.value}</p>
+              </div>
+            {/each}
+          </div>
+        {/if}
         {#if skills.length > 0}
           <Legend />
           <table class="assessment-table">
@@ -105,18 +117,7 @@
           </table>
           <Legend />
         {/if}
-        {@const narratives = getNarrativeFields(student.response.fields, metadata)}
-        {#if narratives.length > 0}
-          <div class="narratives">
-            <h3>Teacher Comments</h3>
-            {#each narratives as n}
-              <div class="narrative-block">
-                <div class="narrative-label">{n.title}</div>
-                <p class="narrative-text">{n.value}</p>
-              </div>
-            {/each}
-          </div>
-        {/if}
+        
       {:else}
         <p class="no-data">No assessment data available.</p>
       {/if}
