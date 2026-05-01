@@ -1,4 +1,3 @@
-<svelte:options customElement="eld-print-page" />
 <script lang="ts">
   import { onMount } from 'svelte'
   import { formatName, formatDate, getMetadataFields, getAssessmentLabel, groupAssessmentFields, getMarkingPeriods, getNarrativeFields } from '$lib/utils'
@@ -44,7 +43,7 @@
 {:else}
   <button class="print-back-floating" onclick={() => onNavigate?.()}><span class="arrow">←</span><span class="back-text">Back</span></button>
   {#each students as student, i}
-    <div class="page" class:page-break={i < students.length - 1} class:page-even={i % 2 === 0} class:page-odd={i % 2 !== 0}>
+    <div class="page" class:page-break={i < students.length - 1}>
       <div class="page-header">
         <h1>ELD Progress Report</h1>
       </div>
@@ -121,6 +120,11 @@
       {:else}
         <p class="no-data">No assessment data available.</p>
       {/if}
+
+      <footer class="page-footer">
+        <span class="footer-name">{formatName(student)}</span>
+        <span class="footer-date">{formatDate(student.response?.submitted_at)}</span>
+      </footer>
     </div>
   {/each}
 {/if}
@@ -205,10 +209,31 @@
     font-size: 14px;
   }
 
+  .page-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 24px;
+    padding-top: 8px;
+    border-top: 1px solid #e0e0e0;
+    font-size: 11px;
+    color: #999;
+  }
+  .footer-name { font-weight: 600; }
+  .footer-date { color: #bbb; }
+
+
   @media print {
     @page { margin: 0.5in; }
-    .page { padding: 0; max-width: none; }
+    .page {
+      padding: 0;
+      max-width: none;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
     .page-break { page-break-after: always; }
+    .page-footer { margin-top: auto; }
   }
 .print-back-row { display: none; }
 .print-back-floating {
