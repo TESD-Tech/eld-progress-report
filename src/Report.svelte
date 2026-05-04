@@ -59,13 +59,13 @@
         <div><span class="label">Home Room</span><span class="val">{student.home_room || '—'}</span></div>
         <div><span class="label">Assessment Date</span><span class="val">{formatDate(student.response?.submitted_at)}</span></div>
         {#if student.response?.fields}
-          {@const p = calculateProgress(student.response.fields, metadata)}
+          <!-- {@const p = calculateProgress(student.response.fields, metadata)}
           {#if p.total > 0}
             <div>
               <span class="label">Overall Progress</span>
               <span class="val">{p.percent}% ({p.meets}/{p.total} skills meeting expectations)</span>
             </div>
-          {/if}
+          {/if} -->
           {@const meta = getMetadataFields(student.response.fields, metadata)}
           {#if meta['Proficiency Level']}
             <div><span class="label">Proficiency Level</span><span class="val">{meta['Proficiency Level']}</span></div>
