@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html>
-<head>
+<!-- Page Redirect -->
+	~[if#1a.isguardian]
+	~[if#2.~([Students]allowwebaccess)=0]
+	~[redirect:/guardian/student_information_not_available.html]
+	[/if#2]
+	[/if#1a]
+<!-- End Page Redirect Code -->
+	<head>
   <title>ELD Progress Report</title>
-  ~[wc:commonscripts]
-  <link href="/images/css/screen.css" rel="stylesheet" media="screen">
-</head>
-<body>
-  ~[wc:guardian_header_css]
+		~[wc:guardian_header]
 
   <eld-progress-report-app portal="guardian" year-id="~(curyearid)"></eld-progress-report-app>
 
@@ -16,6 +19,8 @@
     import(/* @vite-ignore */ path).catch(e => console.error('ELD load failed:', e))
   </script>
 
-  ~[wc:guardian_footer_css]
-</body>
-</html>
+		~[wc:guardian_footer]
+	</body>
+
+
+</head></html>

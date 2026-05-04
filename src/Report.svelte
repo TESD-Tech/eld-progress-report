@@ -97,10 +97,11 @@
     {/if}
 
     <AssessmentGrid fields={student.response?.fields ?? []} {metadata} />
-
-    <div class="print-row">
-      <button onclick={() => onPrint?.(student!.student_dcid)}>Print Report</button>
-    </div>
+    {#if portal !== 'guardian'}
+      <div class="print-row">
+        <button onclick={() => onPrint?.(student!.student_dcid)}>Print Report</button>
+      </div>
+    {/if}
   {/if}
 </div>
 

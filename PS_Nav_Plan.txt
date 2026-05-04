@@ -1,0 +1,127 @@
+
+ The ELD Progress Report plugin's pages are now working in PowerSchool but have no nav entries in any portal. Users
+ can only reach the pages via direct URL. Each portal needs its own nav mechanism:
+ - Admin: PowerSchool's pagecataloging system (JSON config, most sophisticated)
+ - Teachers: Wildcard injection into the left nav via jQuery
+ - Guardian: Wildcard injection into the guardian header nav menu via jQuery
+
+ Patterns sourced from elementary-progress-report (admin pagecataloging) and tesd-field-trips (teacher wildcard).
+
+ ---
+ 1. Admin — Pagecataloging JSON
+
+ Create: src/powerschool/pagecataloging/te-tech-eld-progress-report.json
+
+ {
+   "pages": [
+     {
+       "htmlID": "navTEEldProgressReport",
+       "title": "ELD Progress Report",
+       "version": "26.05.01",
+       "contextType": "student",
+       "requiredContext": "student",
+       "sortOrder": 50,
+       "pageURL": "/admin/eld-progress-report/dashboard.html",
+       "parentHTMLID": "navStudentAcademicPerformanceSection",
+       "districtLevelContext": 1
+     }
+   ]
+ }
+
+ - version will be auto-updated by ps-package on next pnpm package run
+ - ps-package picks up the pagecataloging/ folder and includes it in the main ZIP (not the DATA zip)
+ - Mirrors the elementary-progress-report pattern exactly
+
+ ---
+ 2. Teachers — Wildcard Nav Injection
+
+ Create: src/powerschool/WEB_ROOT/wildcards/teachers_nav_css.eld-progress-report.leftnav.footer.txt
+
+ ~[if#isElem.~(curschoolid)>4000]
+ <script>
+   document.addEventListener('DOMContentLoaded', () => {
+     const ul = document.querySelector('#nav-main ul');
+     if (!ul) return;
+     const li = document.createElement('li');
+     const a = document.createElement('a');
+     a.href = '/teachers/eld-progress-report/dashboard.html';
+     a.textContent = 'ELD Progress Report';
+     li.appendChild(a);
+     ul.prepend(li);
+   });
+ </script>
+ [/if#isElem]
+
+ This wildcard is auto-included whenever a page uses ~[wc:teachers_nav_css]. The teachers HTML pages currently only
+ use ~[wc:teachers_header_css] — they need ~[wc:teachers_nav_css] added for the injection to fire.
+
+ Modify: src/powerschool/WEB_ROOT/teachers/eld-progress-report/dashboard.html and report.html
+
+ Add after ~[wc:teachers_header_css] breadcrumb line:
+ ~[wc:teachers_navigation_css]
+ ~[wc:teachers_nav_css]
+
+ (teachers_navigation_css renders the left sidebar panel; teachers_nav_css is the hook our wildcard injects into)
+
+ ---
+ 3. Guardian — Wildcard Nav Injection
+
+ Create: src/powerschool/WEB_ROOT/wildcards/guardian_header_css.eld-progress-report.leftnav.footer.txt
+
+ ~[if#isElem.~(curschoolid)>4000]
+ <script>
+   document.addEventListener('DOMContentLoaded', () => {
+     const menu = document.querySelector('[role="menu"]');
+     if (!menu) return;
+     const li = document.createElement('li');
+     li.setAttribute('role', 'menuitem');
+     const a = document.createElement('a');
+     a.href = '/guardian/eld-progress-report/dashboard.html';
+     a.textContent = 'ELD Progress Report';
+     li.appendChild(a);
+     menu.prepend(li);
+   });
+ </script>
+ [/if#isElem]
+
+ The ELD guardian pages already use ~[wc:guardian_header_css] so this wildcard will be auto-included — no HTML page
+ changes needed.
+
+ Modify: src/powerschool/WEB_ROOT/guardian/eld-progress-report/dashboard.html and report.html
+
+ Add ~[wc:guardian_navigation_css] after ~[wc:guardian_header_css] (mirrors field-trips pattern, renders the guardian
+  left nav panel).
+
+ ---
+ Files Summary
+
+ ┌────────┬───────────────────────────────────────────────────────────────────────────────────────────────┐
+ │ Action │                                             File                                              │
+ ├────────┼───────────────────────────────────────────────────────────────────────────────────────────────┤
+ │ Create │ src/powerschool/pagecataloging/te-tech-eld-progress-report.json                               │
+ ├────────┼───────────────────────────────────────────────────────────────────────────────────────────────┤
+ │ Create │ src/powerschool/WEB_ROOT/wildcards/teachers_nav_css.eld-progress-report.leftnav.footer.txt    │
+ ├────────┼───────────────────────────────────────────────────────────────────────────────────────────────┤
+ │ Create │ src/powerschool/WEB_ROOT/wildcards/guardian_header_css.eld-progress-report.leftnav.footer.txt │
+ ├────────┼───────────────────────────────────────────────────────────────────────────────────────────────┤
+ │ Modify │ src/powerschool/WEB_ROOT/teachers/eld-progress-report/dashboard.html                          │
+ ├────────┼───────────────────────────────────────────────────────────────────────────────────────────────┤
+ │ Modify │ src/powerschool/WEB_ROOT/teachers/eld-progress-report/report.html                             │
+ ├────────┼───────────────────────────────────────────────────────────────────────────────────────────────┤
+ │ Modify │ src/powerschool/WEB_ROOT/guardian/eld-progress-report/dashboard.html                          │
+ ├────────┼───────────────────────────────────────────────────────────────────────────────────────────────┤
+ │ Modify │ src/powerschool/WEB_ROOT/guardian/eld-progress-report/report.html                             │
+ └────────┴───────────────────────────────────────────────────────────────────────────────────────────────┘
+
+ ---
+ Verification
+
+ 1. pnpm package — confirm no errors, check that dist/pagecataloging/te-tech-eld-progress-report.json exists in the
+ output
+ 2. Install the new TE_Tech_ELD_Progress_Report-*.zip in PowerSchool (UI plugin only — DATA plugin unchanged)
+ 3. Admin: Navigate to any student profile → left nav → Academic Performance section → confirm "ELD Progress Report"
+ link appears and loads the dashboard
+ 4. Teachers: Log in as a teacher at an elementary school (ID > 4000) → confirm "ELD Progress Report" appears in the
+ left nav
+ 5. Guardian: Log in as a guardian at an elementary school → confirm "ELD Progress Report" appears in the nav menu
+ 

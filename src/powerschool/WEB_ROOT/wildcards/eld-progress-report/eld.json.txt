@@ -1,4 +1,4 @@
-~[tlist_sql;
+~ [tlist_sql;
 WITH selected_students AS (
     -- Filters students based on active enrollments
     SELECT DISTINCT 

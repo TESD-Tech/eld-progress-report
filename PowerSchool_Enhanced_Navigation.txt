@@ -1,0 +1,421 @@
+Enhanced Navigation Customization
+How To Customize The Enhanced Navigation Menu
+Introduction
+With the release of 23.5.0.0 a new enhanced navigation system has been introduced. Navigation Links are stored in the PS SIS Database, under the Navigation and PageCatalog tables. The PageCatalog table holds information specific to the page such as Title and URL. The Navigation table contains a reference to the PageCatalog page and holds the structure of the navigation. To add links to the Enhanced Navigation, customizers will create JSON files that are parsed, and data is then stored in the appropriate tables. Links to custom pages may also be added via the new Custom Links page.
+
+Currently there are two types of navigation supported: App Nav and Detail Nav. The App Nav is the main PowerSchool Left Navigation which contains icons at the root Category level and supports up to 4 levels of information. The Detail Nav supports up to 3 levels of information and does not contain icons for the root Category level.
+
+Additional changes to this work relate to the Student/Staff information sections of the page. If any customizations are being done to these areas, they may not display as they currently do because we are restructuring the information.
+
+Best Practices for Partners
+To ensure users have a good experience, please keep our best practices in mind as links are placed in the navigation. Categories should not be added to the root menu. The applications category can be used, or links can be placed in relevant existing categories. Please also ensure links are inserted alphabetically.
+
+EUI Guidelines
+App Nav
+This type of navigation uses fly out menus to display the navigation tree. Some categories will have a single-layer menu and others will include additional levels depending on how many levels the navigation tree contains.
+
+App Nav Screenshot
+Detail View
+This implementation utilizes HTML and CSS to create a flyout menu system similar to the app nav above. This version only supports up to 3 layers in depth.
+
+Details Nav Screenshot
+Additional UI Changes
+Tabs
+Along with the UI structure changes of the navigation, pages and workflows were also reorganized. For example, certain workflows which use tabs as a way to navigate, such as Health pages, were reorganized to be a part of the navigations. Due to this change, the old SIS Tabs were deemed unnecessary. The tabs are hidden by default using CSS in the Enhanced Navigation. If tabs are still needed for navigation the class shown_tabs can be added to the "ul" element to ensure the tabs will continue to display as before. But customizers should include the page definitions for each tabbed page as children of a isLandingPage page definition.
+
+The following examples demonstrate how to add the shown_tabs when using either of the SIS tab mechanisms.
+
+Example of Dynamic Tabs
+<div class="tabs">
+ <ul class="shown_tabs" >
+  <li><a href="#tabOneContent">Tab 1</a></li>
+  <li><a href="#tabTwoContent">Tab 2</a></li>
+  <li><a href="#tabThreeContent">Tab 3</a></li>
+ </ul>
+ <div id="tabOneContent">
+    Your tab one content goes here...
+ </div>
+ <div id="tabTwoContent">
+    Your tab two content goes here...
+ </div>
+ <div id="tabThreeContent">
+    Your tab three content goes here...
+ </div>
+</div>
+Example of Static Tabs
+<ul class="tabs shown_tabs"> 
+    <li class="selected"> 
+          <a href="#">Selected Tab</a> 
+      </li> 
+      <li> 
+          <a href="#">Tab 2</a> 
+      </li> 
+      <li> 
+          <a href="#">Tab 3</a> 
+      </li> 
+      <li> 
+         <a href="#">Tab 4</a> 
+      </li> 
+         <li> 
+         <a href="#">Tab 5</a> 
+      </li> 
+    </ul>
+Student Alerts
+Student alerts have been updated to use new SVG icons and have been moved in to the student details header. In order to ensure custom alerts display correctly a strict HTML format should be followed.
+
+Using PowerSchool Design System SVG icons
+To find a desired pds-icon name go to /admin/ui_examples/navigation/showPdsIcons.html to an available SIS. This page shows all available icons and their name.
+
+<a class="dialogM" title="{Your Text}" href="{Path to Alert Template}"> <pds-icon name="{pds-icon name}” style="height:18px;width:18px;"> </a>
+Using img tags for png or svg files
+<a class="dialogM" title="{Your Text}" href="{Path to Alert Template}"> <img src="{Path to image}" alt="{Alternative Text to the image}"> </a>
+Where to Place JSON(s)
+Customizers will include their JSONS under pagecataloging/ in their plugin zip folder in one of two ways:
+
+For plugins that need to support pre-23.5.0 SIS it is recommended to provided a separate plugin which contains the JSONs defining the necessary Navigation/PageCatalog records. Zip this plugin and the pre-23.5.0 plugin into a single zip file. Provide instructions to customers stating the plugin with the JSONs should only be installed once they have upgraded to 23.5.0.
+
+For any new plugin beyond 23.5.0, plugins will be allowed to include their pagecataloging folder at the root level of the plugin zip folder. Upon enabling the plugin the JSONs will be read, validated, and Navigation/PageCatalog records will be added to the DB.
+
+Note: Plugins with page catalog content are only supported on PowerSchool 23.5.0.0 or later. Attempts to install and enable them on earlier versions will fail.
+
+
+Development Process
+Make changes in the JSONs as needed, but make sure with each new change the version number is incremented.
+Recommended Development Process Using 22.11.0.0 or Newer SIS
+After making changes to JSONs, make sure to also increment the version in the plugin xml and re-zip the plugin.
+Go to Plugin Management Console and update or delete/re-install the plugin.
+Upon clicking enable:
+The JSONs will be validate. If there are any validation errors they will be displayed in a drawer in the browser.
+-- Correct the validation errors, then go back to step 1.
+If there are no errors, Click the Enable button in the drawer.
+After enabling the plugin, the JSONs will be read and after a page refresh the Navigation will be updated with the plugin’s links.
+How to View ParentHTMLID and SortOrder of Existing Categories/Links
+The values for parentHTMLID and sortOrder of existing categories/links are exposed in the DOM. The developer tools in your browser can be used to find these values. In order to view the values, right click on an item (category/link) in the left navigation and click on Inspect. This will open up the browser developer tools. The HTML element will have an attribute called data-custom-info that has these attribute values.
+
+Dev-Tools-1
+
+Dev-Tools-2
+
+Core Landing/Link List Pages that were Removed for the Enhanced Navigation
+District Setup - /admin/district/home.html
+School Setup - /admin/schoolsetup/home.html
+System Administrator - /admin/tech/home.html
+System Settings - /admin/systemsettings/home.html
+Page and Data Management - /admin/tech/pageanddatamanagement.html
+Special Functions - /admin/functions.html
+Group Functions - /admin/studentlist/functions.html
+Restrictions/Requirements
+Customizations will only be able to alter their own links and will not be able to modify core or Compliance SIS links.
+Currently there is no support for deletes in the framework at this time.
+Only certain PS-HTML tags will be allowed to be included in the page URLs (refer to the list in the Currently Supported PS-HTML Tags section).
+The JSON must be structured as shown in the JSON Structure section.
+Currently Supported PS-HTML Tags
+~(ATT_SetDefaultScreenUriIncludeParams)
+~(curschoolid)
+~(curschooldcid)
+~(curstudid)
+~(curtchrid)
+~(curyearid)
+~(frn)
+~(gpv.
+~(rn)
+~(schedule.yearidcurrent)
+~(schedule.yearidfuture)
+~(studentfrn)
+~(studentrn)
+~(studentscreenaccess;
+~(teacherfrn)
+~(teacherrn)
+~[cnfg_thisserverfrn]
+~[displayprefyearschool:
+~[gpv:
+~[if.
+~[x:ATT_SetAttBatchChangeLinkSelect]
+~[x:configitem;
+~[x:fmly_more2url]
+~[x:userid]
+~(*decode...
+~[prefschool
+~[displayprefschool
+~(userfrn)
+~[displaypref
+~[displayprefschoolid
+~[displayprefyearschool
+~[displayprefyear
+~[x:users_dcid
+~(*compliance;
+~(curtermid
+~([ (ex. ~([01]id) )
+~(attendance.enabled.for.daily)
+~(attendance.enabled.for.intervalOnly)
+~(attendance.enabled.for.meeting)
+~(attendance.enabled.for.meetingInterval)
+~(attendance.enabled.for.meetingOnly)
+~(attendance.enabled.for.time)
+JSON Structure
+The main property of the JSON is pages which hold an array of objects. Valid objects include a Category that contains child objects or additional subcategories and a child object that contains a reference to its parent category via the parentHTMLID property.
+
+Caution: Do not use the following JSON as an example. It is strictly to show the structure of the JSONs to customize the Enhanced Navigation.
+{
+  "pages": [
+      {
+          "htmlID": "navFunctionsSection",
+          "title": "psx.txt.wildcards.admin_nav_menu_left_css.functions",
+          "iconName": "tools",
+          "sortOrder": 400,
+          "pageURL": null,
+          "pageDescription": null,
+          "districtLevelContext": 0,
+          "contextType": "main",
+          "version": "23.5.0.0",
+          "children": [
+              {
+                  "htmlID": "navAttStatus",
+                  "title": "psx.html.admin.functions.backfill_management",
+                  "sortOrder": 100,
+                  "pageURL": "/admin/attendance/functions/attendancestatus.html",
+                  "districtLevelContext": 0,
+                  "contextType": "main",
+                  "version": "23.5.0.0"
+              },
+              {
+                  "htmlID": "navAttStatus",
+                  "title": "psx.html.admin.functions.backfill_management",
+                  "sortOrder": 200,
+                  "pageURL": "/admin/attendance/functions/attendancestatus.html",
+                  "districtLevelContext": 0,
+                  "contextType": "main",
+                  "version": "23.5.0.0"
+              }
+          ]
+        }
+    ]
+}
+    
+JSON Properties
+JSON Key	Type	Description	Required
+pages	Array	Root element, expected to exist by the parser. Holds all Navigation/PageCatalog JSON elements.	Yes
+htmlID	String	The ID included on the element in the HTML. Must be Unique across all records in the DB. There is no support for updating htmlID for a record as of the writing of this document.	Yes
+title	String	The name of the page, will be the text displayed in the link in the UI. Can be a message key or plain text.	Yes
+iconName	String	Name of the PDS icon to be displayed for the Category. (App Nav view only)	No
+sortOrder	Integer	Used to order the links in the navigation. Sort Order of Core links starts at 100 and increments by 100 as the list progresses. This is to provide room for multiple links to be placed between, before, or after any Core links.	Yes
+pageURL	String	The URL to the Page. This property does not need to be included if defining a Category. PS-HTML tags are supported in this property. The URL must begin with "/admin".	No
+originalParentUrl	String	The URL of the link list or landing page which may have originally contained the link the navigation record represents. The use cases are as follows:
+Single OriginalParentUrl: User needs access to this OriginalParentUrl page in order to have the page in the table visible in the left nav in the updated navigation.
+“OriginalParentUrl1>OriginalParentUrl2” : ‘>’ denotes that url1 is grandparent and url2 is parent (in the old UI) to the page in the table. The user needs access to both url1 and url2 in order to see the page in the left nav in the updated navigation.
+“OriginalParentUrl1,OriginalParentUrl2" : ’“,” denotes that the page in the table is on both of these pages (in the old UI). The user needs access to either url1 or url2 in order to see the page in the left nav in the updated navigation.
+No
+districtLevelContext	Integer	Determines if a link is to be shown in the District Office or School Context. 0 = both School and District, 1=School only, 2=District Office only. Default if left out is 0.	No
+contextType	String	Determines the Navigation Context the Link belongs to. Currently the only supported navigation contexts are main, student, and staff. If not provided the record is considered to be just a PageCatalog record.	No
+requiredContext	String	Specifies whether a selection is required to visit the page. If a context is specified the user will be forced to make a selection before continuing to the provided link. This will also be used in Global Search, not required. Currently, the only supported required contexts are student and staff.	No
+version	String	Version of the link. Used to determine if a link has been updated. Any incrementation to the version number indicates the file has changed and the SIS should update the DB with the record. Format should follow normal versioning strings with numbers at each level {major}.{minor}.{patched/hotfix}.{development_version} example: 23.5.0.1.	Yes
+children	Array	Array of Navigation/PageCatalog JSON elements which fall under the parent Category.	No
+parentHTMLID	String	Should be the htmlID of an existing Category that the link should be added to. Not used if the link is defined in a category’s children array. See examples.	No
+isNewTab	Boolean	Setting this to true indicates that the page will be opened in a new browser tab.	No
+isLandingPage	Boolean	Setting this to true indicates that the page contains a collection of links to child pages. An example would be a list of custom report pages. Those child pages can optionally be added as children of the page so that they appear in the navigation menu.	No
+checkParams	Boolean	This value tells the framework that all query parameters in the URL are to be considered during the active link check. This is used when there multiple links with the same URL path but they have different query parameters which indicate which version of the page to show.	No
+Examples
+Add a new Category with Links to the App Nav
+Caution: Be careful using the provided examples below, there is no guarantee that parentHTMLID values will be accurate within the SIS.
+The following JSON adds a new Category with Links
+
+{
+  "pages": [
+      {
+          "htmlID": "customExample",
+          "title": "Custom Example",
+          "iconName": "tools",
+          "sortOrder": 401,
+          "pageURL": null,
+          "pageDescription": null,
+          "districtLevelContext": 0,
+          "contextType": "main",
+          "version": "23.5.0.0",
+          "children": [
+              {
+                  "htmlID": "customExampleChild1",
+                  "title": "Custom Example Child 1",
+                  "sortOrder": 0,
+                  "pageURL": "/admin/example/child1.html",
+                  "districtLevelContext": 0,
+                  "contextType": "main",
+                  "version": "23.5.0.0"
+              },
+              {
+                "htmlID": "customExampleChild2",
+                "title": "Custom Example Child 2",
+                "pageURL": "/admin/example/child2.html",
+                "version": "23.5.0.0",
+                "contextType": "main",
+                "sortOrder": 300,
+              }
+          ]
+        }
+    ]
+    }
+    
+Add Links to Existing Categories in the App Nav
+This JSON will add one link to the navSchoolEnrollmentSection Category and one link to the navSystemManagementData Category using the parentHTMLIDs. The sort order makes sure it is in the correct location in the list.
+
+{
+  "pages": [
+          {
+            "htmlID": "customExampleChild3",
+            "title": "Custom Example Child 3",
+            "pageURL": "/admin/example/child3.html",
+            "version": "23.5.0.0",
+            "contextType": "main",
+            "districtLevelContext": 1,
+            "sortOrder": 50,
+            "parentHTMLID": "navSchoolEnrollmentSection"
+          },
+          {
+            "htmlID": "customExampleChild4",
+            "title": "Custom Example Child 4",
+            "pageURL": "/admin/example/child4.html",
+            "version": "23.5.0.0",
+            "contextType": "main",
+            "sortOrder": 150,
+            "parentHTMLID": "navSystemManagementData"
+          }  
+    ]
+   }
+    
+Update/Reorder/Move links in the App Nav
+In this example, we are swapping navSchoolEnrollmentSection and navSystemManagementData from the previous example and adjusting their position in the App Nav. We are also repositioning the customExample Category added in the first example. Notice that the version value is incremented to 23.5.0.1 from 23.5.0.0. Without this change the server will not know these records have changed and need updating.
+
+{
+  "pages": [
+          {
+            "htmlID": "customExampleChild5",
+            "title": "Custom Example Child 5",
+            "pageURL": "/admin/example/child5.html",
+            "version": "23.5.0.1",
+            "contextType": "main",
+            "districtLevelContext": 1,
+            "sortOrder": 150,
+            "parentHTMLID": "navSystemManagementData"
+          },
+          {
+            "htmlID": "customExampleChild6",
+            "title": "Custom Example Child 6",
+            "pageURL": "/admin/example/child6.html",
+            "version": "23.5.0.1",
+            "contextType": "main",
+            "sortOrder": 50,
+            "parentHTMLID": "navSchoolEnrollmentSection"
+          },
+          {
+            "htmlID": "customExample",
+            "title": "Custom Example",
+            "iconName": "tools",
+            "sortOrder": 501,
+            "pageURL": null,
+            "pageDescription": null,
+            "districtLevelContext": 0,
+            "contextType": "main",
+            "version": "23.5.0.1",
+            "children": [
+              {
+                "htmlID": "customExampleChild7",
+                "title": "Custom Example Child 7",
+                "pageURL": "/admin/example/child7.html",
+                "sortOrder": 0,
+                "districtLevelContext": 0,
+                "contextType": "main",
+                "version": "23.5.0.0"
+              },
+              {
+                "htmlID": "customExampleChild8",
+                "title": "Custom Example Child 8",
+                "pageURL": "/admin/example/child8.html",
+                "version": "21.11.2.0",
+                "contextType": "main",
+                "sortOrder": 300,
+              }
+          ]
+        }
+    ]
+   }
+    
+Add a new Category with Links to the Detail Nav
+This example adds a new Category to the Detail Nav, with a Subcategory, and 2 links.
+
+{
+    "pages": [
+        {
+            "htmlID": "customStudentExample",
+            "title": "Custom Student Example",  
+            "version": "23.5.0.0",
+            "contextType": "student",
+            "sortOrder": 0,
+            "children": [
+                {
+                    "htmlID": "customStudentExampleSub",
+                    "title": "Custom Student Example Subcategory",
+                    "version": "23.5.0.0",
+                    "contextType": "student",
+                    "requiredContext": "student",
+                    "sortOrder": 0,
+                    "children": [
+                        {
+                            "htmlID": "customStudentExampleChild1",
+                            "title": "Custom Student Example Child 1",
+                            "pageURL": "/admin/example/child1.html?frn=~(studentfrn)",
+                            "version": "23.5.0.0",
+                            "contextType": "student",
+                            "requiredContext": "student",
+                            "sortOrder": 0
+                        },
+                        {
+                            "htmlID": "customStudentExampleChild2",
+                            "title": "Custom Student Example Child 2",
+                            "pageURL": "/admin/example/child2.html?frn=~(studentfrn)",
+                            "version": "23.5.0.0",
+                            "contextType": "student",
+                            "requiredContext": "student",
+                            "sortOrder": 100
+                        }
+                      ]
+                  }
+              ]
+          }
+      ]
+    }
+    
+Add Links to Existing Categories in the Detail Nav
+This example adds customStudentExampleChild3 to the customStudentExample Category
+
+{
+    "pages": [
+        {
+            "htmlID": "customStudentExampleChild3",
+            "title": "Custom Student Example Child 3",
+            "pageURL": "/admin/example/child2.html?frn=~(studentfrn)",
+            "version": "23.5.0.0",
+            "contextType": "student",
+            "requiredContext": "student",
+            "sortOrder": 425,
+            "parentHTMLID": "customStudentExample"
+          }
+      ]
+}
+    
+Update/Reorder/Move links in the Detail Nav
+This example moves customStudentExampleChild3 to a different category and adjusts the position in the list. Notice that the version value is increased to 23.5.0.1 from 23.5.0.0. Without this change the server will not know these records have changed and need updating.
+
+{
+    "pages": [
+          {
+            "htmlID": "customStudentExampleChild3",
+            "title": "Custom Student Example Child 3",
+            "pageURL": "/admin/example/child2.html?frn=~(studentfrn)",
+            "version": "23.5.0.1",
+            "contextType": "student",
+            "requiredContext": "student",
+            "sortOrder": 50,
+            "parentHTMLID": "customStudentExampleSub"
+          }
+      ]
+}
+    
