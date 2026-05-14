@@ -71,8 +71,15 @@ export function getDashboardSummary(students: Student[], metadata: Record<string
       const title = metadata[f.element_id]?.title
       return title === 'Marking Period 1' || title === 'Marking Period 2'
     })
-    const meets = fields.filter(f => f.value?.trim() === '✓').length
-    return fields.length > 0 ? (meets / fields.length) * 100 : 0
+    const assessed = fields.filter(f => {
+      const value = f.value?.trim()
+      return Boolean(value && value !== '/')
+    })
+    const meets = assessed.filter(f => {
+      const value = f.value?.trim()
+      return value === '+' || value === '✓'
+    }).length
+    return assessed.length > 0 ? (meets / assessed.length) * 100 : 0
   })
   const avgProgress =
     progress.length > 0

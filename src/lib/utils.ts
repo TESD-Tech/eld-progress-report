@@ -31,13 +31,18 @@ export function calculateProgress(fields: StudentField[], metadata: Record<strin
   let meets = 0,
     approaching = 0,
     below = 0
+  let assessed = 0
   for (const f of assessment) {
     const v = f.value?.trim()
-    if (v === '✓') meets++
-    else if (v === '●') approaching++
-    else if (v === '/') below++
+    if (v === '+' || v === '✓') {
+      meets++
+      assessed++
+    } else if (v === '●') {
+      below++
+      assessed++
+    }
   }
-  const total = assessment.length
+  const total = assessed
   return {
     meets,
     approaching,
@@ -58,7 +63,7 @@ export function groupAssessmentFields(
     if (!container_title || !title) continue
     if (title !== 'Marking Period 1' && title !== 'Marking Period 2') continue
     if (!result.has(container_title)) result.set(container_title, new Map())
-    result.get(container_title)!.set(title, f.value ?? '')
+    result.get(container_title)!.set(title, f.value?.trim() || '/')
   }
   return result
 }
@@ -124,15 +129,28 @@ export function getAssessmentLabel(value: string | null | undefined): {
   meaning: string
   cssClass: string
 } {
-  switch (value?.trim()) {
-    case '✓':
-      return { symbol: '✓', meaning: 'Meets Expectation', cssClass: 'val-meets' }
-    case '●':
-      return { symbol: '●', meaning: 'Approaching Expectation', cssClass: 'val-approaching' }
-    case '/':
-      return { symbol: '/', meaning: 'Below Expectation', cssClass: 'val-below' }
+  const normalizedValue = value?.trim() || '/'
+  switch (normalizedValue) {
     case '+':
-      return { symbol: '+', meaning: 'Exceeds Expectation', cssClass: 'val-exceeds' }
+      return {
+        symbol: '+',
+        meaning: 'Student performs the indicated skill consistently and independently',
+        cssClass: 'val-exceeds',
+      }
+    case '✓':
+      return {
+        symbol: '✓',
+        meaning: 'Student demonstrates appropriate progress toward skill',
+        cssClass: 'val-meets',
+      }
+    case '●':
+      return {
+        symbol: '●',
+        meaning: 'Student requires additional assistance with the skill',
+        cssClass: 'val-below',
+      }
+    case '/':
+      return { symbol: '/', meaning: 'Not assessed at this time', cssClass: 'val-empty' }
     default:
       return { symbol: '—', meaning: 'Not Yet Assessed', cssClass: 'val-empty' }
   }

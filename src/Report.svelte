@@ -172,6 +172,7 @@
     padding: 24px;
     box-shadow: 0 2px 4px rgba(0,0,0,.08);
     margin-top: 24px;
+    margin-bottom: 24px;
   }
   .narratives h2 { margin: 0 0 16px; font-size: 18px; color: #333; }
   .narrative-block { margin-bottom: 16px; }
