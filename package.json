@@ -1,16 +1,21 @@
 {
   "name": "eld-progress-report",
-  "version": "26.05.09",
+  "version": "26.05.10",
   "type": "module",
   "description": "",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "package": "vite build && node node_modules/@tesd-tech/ps-package/index.js",
-    "test": "vitest",
+    "test": "pnpm test:run && pnpm test:e2e",
+    "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:debug": "playwright test --debug --project=chromium",
+    "test:e2e:ui": "playwright test --ui",
+    "test:all": "pnpm test:run && pnpm test:e2e",
     "redact": "node scripts/redact-names.cjs public/eld.json > public/eld-redacted.json"
   },
   "keywords": [],
@@ -21,6 +26,7 @@
     "@tesd-tech/ps-package": "^25.10.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@sveltejs/vite-plugin-svelte": "^7.0.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/svelte": "^5.3.1",

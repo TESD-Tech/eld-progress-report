@@ -1,4 +1,5 @@
 import type { Student, StudentField, FieldMetadata } from './data'
+import { isMarkingPeriodTitle } from './data'
 
 export function formatName(student: Student): string {
   return `${student.first_name || ''} ${student.last_name || ''}`.trim() || 'Unknown Student'
@@ -26,7 +27,7 @@ export function calculateProgress(fields: StudentField[], metadata: Record<strin
 } {
   const assessment = fields.filter(f => {
     const title = metadata[f.element_id]?.title
-    return title === 'Marking Period 1' || title === 'Marking Period 2'
+    return isMarkingPeriodTitle(title)
   })
   let meets = 0,
     approaching = 0,
@@ -61,7 +62,7 @@ export function groupAssessmentFields(
     const title = metadata[f.element_id]?.title
     const container_title = metadata[f.element_id]?.container_title
     if (!container_title || !title) continue
-    if (title !== 'Marking Period 1' && title !== 'Marking Period 2') continue
+    if (!isMarkingPeriodTitle(title)) continue
     if (!result.has(container_title)) result.set(container_title, new Map())
     result.get(container_title)!.set(title, f.value?.trim() || '/')
   }
@@ -72,11 +73,15 @@ export function getMarkingPeriods(fields: StudentField[], metadata: Record<strin
   const periods = new Set<string>()
   for (const f of fields) {
     const title = metadata[f.element_id]?.title
-    if (title === 'Marking Period 1' || title === 'Marking Period 2') {
+    if (isMarkingPeriodTitle(title)) {
       periods.add(title)
     }
   }
-  return Array.from(periods).sort()
+  return Array.from(periods).sort((a, b) => {
+    const aNum = Number(a.match(/\d+/)?.[0] ?? 0)
+    const bNum = Number(b.match(/\d+/)?.[0] ?? 0)
+    return aNum - bNum
+  })
 }
 
 export function parseStudentDcid(): string | null {

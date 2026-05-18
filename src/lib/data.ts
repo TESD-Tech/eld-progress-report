@@ -29,6 +29,44 @@ export interface ELDData {
   students: Student[];
 }
 
+export function isMarkingPeriodTitle(title: string | null | undefined): title is string {
+  return typeof title === 'string' && /^Marking Period \d+$/.test(title)
+}
+
+export function normalizeELDStudents(students: Student[]): Student[] {
+  const grouped = new Map<string, Student[]>()
+
+  for (const student of students) {
+    const group = grouped.get(student.student_dcid)
+    if (group) {
+      group.push(student)
+    } else {
+      grouped.set(student.student_dcid, [student])
+    }
+  }
+
+  return Array.from(grouped.values(), group => {
+    const ordered = [...group].sort((a, b) => {
+      const aTime = a.response?.submitted_at ? Date.parse(a.response.submitted_at) : 0
+      const bTime = b.response?.submitted_at ? Date.parse(b.response.submitted_at) : 0
+      if (aTime !== bTime) return bTime - aTime
+      return Number(String(b.response?.id ?? 0)) - Number(String(a.response?.id ?? 0))
+    })
+    const latest = ordered[0]
+    const mergedFields = ordered.flatMap(student => student.response?.fields ?? [])
+
+    return {
+      ...latest,
+      response: latest.response
+        ? {
+            ...latest.response,
+            fields: mergedFields,
+          }
+        : null,
+    }
+  })
+}
+
 
 const isDev = import.meta.env.DEV
 // In dev: Vite serves public/ under the base path, so use BASE_URL (/eld-progress-report/eld.json)
@@ -39,9 +77,9 @@ export async function loadELDData(): Promise<ELDData> {
   const r = await fetch(DATA_URL)
   const raw = await r.json()
   if (raw.metadata && raw.data) {
-    return { metadata: raw.metadata, students: raw.data };
+    return { metadata: raw.metadata, students: normalizeELDStudents(Array.isArray(raw.data) ? raw.data : []) }
   }
-  return { metadata: {}, students: raw };
+  return { metadata: {}, students: normalizeELDStudents(Array.isArray(raw) ? raw : []) }
 }
 
 export const loadStudents = loadELDData
@@ -69,7 +107,7 @@ export function getDashboardSummary(students: Student[], metadata: Record<string
   const progress = withData.map(s => {
     const fields = (s.response!.fields ?? []).filter(f => {
       const title = metadata[f.element_id]?.title
-      return title === 'Marking Period 1' || title === 'Marking Period 2'
+      return isMarkingPeriodTitle(title)
     })
     const assessed = fields.filter(f => {
       const value = f.value?.trim()
