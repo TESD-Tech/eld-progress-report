@@ -1,4 +1,4 @@
-~ [tlist_sql;
+~[tlist_sql;
 WITH selected_students AS (
     -- Filters students based on active enrollments
     SELECT DISTINCT 
@@ -20,7 +20,7 @@ WITH selected_students AS (
             INNER JOIN cc ON cc.studentid = students.id
                 AND cc.dateleft >= CURRENT_DATE
             INNER JOIN sections ON sections.id = cc.sectionid
-                AND sections.teacherid = ~[x:userid]                                                            
+                AND sections.teacher = ~[x:userid]                                                            
             WHERE students.enroll_status = 0
         [/if#portal]
 
