@@ -88,8 +88,23 @@ WITH selected_students AS (
     INNER JOIN u_fb_form_element 
         ON u_fb_form_element.id = u_fb_form_response_element.u_fb_form_element_id
         AND u_fb_form_element.ELEMENT_TYPE != 'sbscontainer'
+
+    ~[if#portal.~[directory]=guardian]
+    INNER JOIN students ON students.id = latest_form_responses.student_id
+    LEFT OUTER JOIN terms ON terms.schoolid = students.schoolid
+            AND terms.yearid = ~(curyearid)
+            AND terms.suppresspublicview = 1 
+            AND SUBSTR(terms.abbreviation, LENGTH(terms.abbreviation)) = SUBSTR(u_fb_form_element.title, LENGTH(u_fb_form_element.title))
+            AND u_fb_form_element.title LIKE '%Marking Period%'
+    [else#portal]
+    LEFT JOIN terms ON 1=2
+    [/if#portal]
+
+          
     INNER JOIN u_fb_form_response_detail 
         ON u_fb_form_response_detail.u_fb_form_response_element_id = u_fb_form_response_element.id
+
+    WHERE terms.id IS NULL -- FILTER OUT TERMS THAT ARE NOT MARKING PERIODS
     GROUP BY 
         latest_form_responses.student_id
       , latest_form_responses.form_id
