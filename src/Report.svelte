@@ -2,7 +2,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import { loadELDData, type Student, type FieldMetadata } from '$lib/data'
-  import { formatName, formatDate, calculateProgress, getMetadataFields, getNarrativeFields } from '$lib/utils'
+  import { formatName, formatDate, calculateProgress, getMetadataFields, getNarrativeFields, getTestFields } from '$lib/utils'
   import { printReport } from '$lib/printUtils'
   import AssessmentGrid from './components/AssessmentGrid.svelte'
   import DebugBar from './components/DebugBar.svelte'
@@ -97,11 +97,27 @@
     {/if}
 
     <AssessmentGrid fields={student.response?.fields ?? []} {metadata} />
-    {#if portal !== 'guardian'}
+
+    {#if student.response?.fields}
+      {@const tests = getTestFields(student.response.fields, metadata)}
+      {#if tests.length > 0}
+        <div class="narratives">
+          <h2>Test Information</h2>
+          {#each tests as t}
+            <div class="narrative-block">
+              <div class="narrative-label">{t.title}</div>
+              <p class="narrative-text">{t.value}</p>
+            </div>
+          {/each}
+        </div>
+      {/if}
+    {/if}
+    
+    <!-- {#if portal !== 'guardian'}
       <div class="print-row">
         <button onclick={() => onPrint?.(student!.student_dcid)}>Print Report</button>
       </div>
-    {/if}
+    {/if} -->
   {/if}
 </div>
 

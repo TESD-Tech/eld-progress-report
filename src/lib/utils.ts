@@ -113,10 +113,28 @@ export function getNarrativeFields(
     if (!title || container_title !== null) continue
     if (SKIP_TITLES.has(title)) continue
     if (!f.value?.trim()) continue
+    if (title.startsWith('Test ')) continue
     result.push({ title, value: f.value.trim() })
   }
   return result.sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true }))
 }
+export function getTestFields(
+  fields: StudentField[],
+  metadata: Record<string, FieldMetadata>,
+): { title: string; value: string }[] {
+  const result: { title: string; value: string }[] = []
+  for (const f of fields) {
+    const { title, container_title } = metadata[f.element_id] ?? {}
+    if (!title || container_title !== null) continue
+    if (SKIP_TITLES.has(title)) continue
+    if (!f.value?.trim()) continue
+    if (!title.startsWith('Test ')) continue
+    result.push({ title, value: f.value.trim() })
+  }
+  return result.sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true }))
+}
+
+
 
 export function getMetadataFields(fields: StudentField[], metadata: Record<string, FieldMetadata>): Record<string, string> {
   const result: Record<string, string> = {}

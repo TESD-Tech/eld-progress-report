@@ -52,7 +52,7 @@ WITH selected_students AS (
     SELECT
         JSON_OBJECTAGG(
             TO_CHAR(u_fb_form_element.id) VALUE JSON_OBJECT(
-                'title'           VALUE u_fb_form_element.title
+                'title'           VALUE COALESCE( u_fb_form_element.title, u_fb_form_element.css_class )
               , 'container_title' VALUE u_fb_form_element_container.title
               RETURNING CLOB
             )
