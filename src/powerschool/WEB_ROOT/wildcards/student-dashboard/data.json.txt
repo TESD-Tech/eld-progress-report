@@ -95,6 +95,7 @@ WITH selected_students AS (
       , cc.termid
       , cc.dateenrolled
       , cc.dateleft
+      , section_teacher.teacher_name
     FROM selected_students
         INNER JOIN cc 
             ON cc.studentid = selected_students.id
@@ -125,6 +126,7 @@ WITH selected_students AS (
               , 'termid'             VALUE schedules.termid
               , 'dateenrolled'       VALUE TO_CHAR(schedules.dateenrolled, 'YYYY-MM-DD')
               , 'dateleft'           VALUE TO_CHAR(schedules.dateleft, 'YYYY-MM-DD')
+              , 'teacher_name'       VALUE schedules.teacher_name
               RETURNING CLOB
             )
             RETURNING CLOB
