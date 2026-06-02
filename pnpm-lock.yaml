@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  lazystream@1.0.1:
+    hash: f0d4a026e3047772532a100ff7d318e8382d35903934bbc698955c470ab98c5a
+    path: patches/lazystream@1.0.1.patch
+
 importers:
 
   .:
@@ -627,8 +632,8 @@ packages:
   esm-env@1.2.2:
     resolution: {integrity: sha512-Epxrv+Nr/CaL4ZcFGPJIYLWFom+YeV1DqMLHJoEd9SYRxNbaFruBwfEX/kkHUJf55j2+TUbmDcmuilbP1TmXHA==}
 
-  esrap@2.2.9:
-    resolution: {integrity: sha512-4KijP+NxCWthMCUC3qHbE6n4vCjqgJS1uAYKhuT/GWfFTf1Qyive2TgOjep+gzbSzRfnNyaN/UU9YmdOt8Eg0A==}
+  esrap@2.2.10:
+    resolution: {integrity: sha512-HUTyxhhAQBl1hhsyLlHD1sh9xF6o6vaejzLxK5sge+LzrdEflQPQaNhC+n98d+OVB8v3LCCF+y80x/4bACjjJw==}
     peerDependencies:
       '@typescript-eslint/types': ^8.2.0
     peerDependenciesMeta:
@@ -1636,7 +1641,7 @@ snapshots:
       glob: 10.5.0
       graceful-fs: 4.2.11
       is-stream: 2.0.1
-      lazystream: 1.0.1
+      lazystream: 1.0.1(patch_hash=f0d4a026e3047772532a100ff7d318e8382d35903934bbc698955c470ab98c5a)
       lodash: 4.18.1
       normalize-path: 3.0.0
       readable-stream: 4.7.0
@@ -1803,7 +1808,7 @@ snapshots:
 
   esm-env@1.2.2: {}
 
-  esrap@2.2.9:
+  esrap@2.2.10:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
 
@@ -1934,7 +1939,7 @@ snapshots:
     transitivePeerDependencies:
       - '@noble/hashes'
 
-  lazystream@1.0.1:
+  lazystream@1.0.1(patch_hash=f0d4a026e3047772532a100ff7d318e8382d35903934bbc698955c470ab98c5a):
     dependencies:
       readable-stream: 2.3.8
 
@@ -2222,7 +2227,7 @@ snapshots:
       clsx: 2.1.1
       devalue: 5.8.1
       esm-env: 1.2.2
-      esrap: 2.2.9
+      esrap: 2.2.10
       is-reference: 3.0.3
       locate-character: 3.0.0
       magic-string: 0.30.21

@@ -1,6 +1,6 @@
 {
   "name": "student-dashboard",
-  "version": "26.06.02",
+  "version": "26.06.03",
   "type": "module",
   "description": "Student Dashboard PowerSchool plugin",
   "scripts": {
@@ -39,5 +39,10 @@
     "typescript": "~6.0.3",
     "vite": "^8.0.16",
     "vitest": "^4.1.8"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "lazystream@1.0.1": "patches/lazystream@1.0.1.patch"
+    }
   }
 }
