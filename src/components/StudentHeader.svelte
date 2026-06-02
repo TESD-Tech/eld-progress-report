@@ -19,7 +19,7 @@
     </div>
   </div>
   <div class="actions">
-    <button class="btn">Log Intervention</button>
+    <!-- <button class="btn">Log Intervention</button> -->
   </div>
 </header>
 

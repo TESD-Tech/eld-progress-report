@@ -127,10 +127,13 @@
       const key = `${c.course_name}|${Math.floor(c.termid / 100)}`
       if (!cells.has(key)) cells.set(key, c.teacher_name ?? '✓')
     }
-    // Representative course record per course name (for color)
+    // Representative course record per course name (most recent year, for color + school)
     const courseRep = new Map<string, ScheduleCourse>()
     for (const c of filtered) {
-      if (!courseRep.has(c.course_name)) courseRep.set(c.course_name, c)
+      const existing = courseRep.get(c.course_name)
+      if (!existing || Math.floor(c.termid / 100) > Math.floor(existing.termid / 100)) {
+        courseRep.set(c.course_name, c)
+      }
     }
     return { years, courseNames, cells, courseRep }
   })
@@ -179,6 +182,7 @@
           <thead>
             <tr>
               <th class="course-col">Course</th>
+              <th class="school-col">School</th>
               {#each pivot.years as year}
                 <th class:selected-col={year === selectedYear}>{yearLabel(year)}</th>
               {/each}
@@ -194,6 +198,7 @@
                   {/if}
                   {name}
                 </td>
+                <td class="school-cell">{rep?.school_name ?? '—'}</td>
                 {#each pivot.years as year}
                   {@const section = pivot.cells.get(`${name}|${year}`)}
                   <td class="section-cell" class:selected-col={year === selectedYear}>
@@ -369,6 +374,8 @@
   }
 
   .pivot-table thead th.course-col { text-align: left; padding-left: 0; min-width: 180px; }
+  .pivot-table thead th.school-col { text-align: left; min-width: 60px; }
+  .school-cell { font-size: 12px; color: #6b7280; white-space: nowrap; }
 
   .pivot-table tbody tr { border-bottom: 1px solid #f9fafb; }
   .pivot-table tbody tr:last-child { border: none; }

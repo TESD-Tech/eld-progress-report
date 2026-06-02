@@ -78,7 +78,7 @@
   }
 
   function truncPeriod(p: string): string {
-    return p.length > 4 ? p.slice(0, 3) + '…' : p
+    return p.length > 6 ? p.slice(0, 3) + '…' : p
   }
 
   function scoreColor(
