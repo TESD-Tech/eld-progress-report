@@ -7,9 +7,8 @@
       "contextType": "student",
       "requiredContext": "student",
       "sortOrder": 50,
-      "pageURL": "/admin/student-dashboard/index.html",
-      "parentHTMLID": "navStudentAcademicPerformanceSection",
-      "districtLevelContext": 0
+      "pageURL": "/admin/students/student-dashboard/index.html?frn=~(studentfrn)",
+      "parentHTMLID": "navStudentAcademicPerformanceSection"
     }
   ]
 }
