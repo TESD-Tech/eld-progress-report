@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student Dashboard</title>
+  ~[wc:commonscripts]
+  <link href="/images/css/screen.css" rel="stylesheet" media="screen">
+</head>
+<body>
+  ~[wc:admin_header_css]
+  <a href="/admin/home.html" target="_top">Start Page</a> &gt; Student Dashboard
+  ~[wc:admin_navigation_css]
+
+  <student-dashboard-app></student-dashboard-app>
+
+  <script type="module">
+    const isDev = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+    const path = isDev ? '/src/main.ts' : '/student-dashboard/app.js?v=~(random16)'
+    import(/* @vite-ignore */ path).catch(e => console.error('StudentDashboard load failed:', e))
+  </script>
+
+  ~[wc:admin_footer_css]
+</body>
+</html>

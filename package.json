@@ -1,8 +1,8 @@
 {
-  "name": "eld-progress-report",
-  "version": "26.05.13",
+  "name": "student-dashboard",
+  "version": "26.06.02",
   "type": "module",
-  "description": "",
+  "description": "Student Dashboard PowerSchool plugin",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -16,7 +16,7 @@
     "test:e2e:debug": "playwright test --debug --project=chromium",
     "test:e2e:ui": "playwright test --ui",
     "test:all": "pnpm test:run && pnpm test:e2e",
-    "redact": "node scripts/redact-names.cjs public/eld.json > public/eld-redacted.json"
+    "redact": "node scripts/redact-names.cjs public/data.json > public/data-redacted.json"
   },
   "keywords": [],
   "author": "",
@@ -31,13 +31,13 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/svelte": "^5.3.1",
     "@tsconfig/svelte": "^5.0.8",
-    "@types/node": "^25.9.0",
-    "@vitest/coverage-v8": "^4.1.6",
-    "@vitest/ui": "^4.1.6",
+    "@types/node": "^25.9.1",
+    "@vitest/coverage-v8": "^4.1.8",
+    "@vitest/ui": "^4.1.8",
     "jsdom": "^29.1.1",
-    "svelte": "^5.55.8",
+    "svelte": "^5.56.1",
     "typescript": "~6.0.3",
-    "vite": "^8.0.13",
-    "vitest": "^4.1.6"
+    "vite": "^8.0.16",
+    "vitest": "^4.1.8"
   }
 }

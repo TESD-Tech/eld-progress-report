@@ -4,7 +4,7 @@ import path from 'path'
 import fs from 'fs'
 
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf-8'))
-const projectName = pkg.name  // 'eld-progress-report'
+const projectName = pkg.name  // 'student-dashboard'
 
 function noEmptyChunks() {
   return {

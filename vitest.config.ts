@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [svelte()],
   test: {
     environment: 'jsdom',
-    setupFiles: ['./src/test/setup.ts'],
+    setupFiles: [],
     globals: true,
     exclude: [...configDefaults.exclude, 'e2e/**'],
   },
@@ -18,6 +18,6 @@ export default defineConfig({
   },
   define: {
     'import.meta.env.DEV': true,
-    'import.meta.env.BASE_URL': '"/eld-progress-report/"',
+    'import.meta.env.BASE_URL': '"/student-dashboard/"',
   },
 })

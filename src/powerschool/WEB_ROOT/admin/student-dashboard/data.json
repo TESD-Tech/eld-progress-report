@@ -1,0 +1,6 @@
+~[tlist_sql;
+-- Served by PowerSchool wildcards engine from:
+-- wildcards/student-dashboard/data.json.txt
+-- This file is a placeholder; the actual wildcard lives in the wildcards/ directory.
+SELECT TO_CLOB('{}') AS full_json FROM dual;
+]~(json)[/tlist_sql]

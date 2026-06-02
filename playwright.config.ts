@@ -7,12 +7,12 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI ? 'github' : 'html',
   use: {
-    baseURL: 'http://127.0.0.1:4173/eld-progress-report/',
+    baseURL: 'http://127.0.0.1:4173/student-dashboard/',
     trace: 'on-first-retry',
   },
   webServer: {
     command: 'pnpm dev --host 127.0.0.1 --port 4173',
-    url: 'http://127.0.0.1:4173/eld-progress-report/',
+    url: 'http://127.0.0.1:4173/student-dashboard/',
     reuseExistingServer: !process.env.CI,
   },
   projects: [

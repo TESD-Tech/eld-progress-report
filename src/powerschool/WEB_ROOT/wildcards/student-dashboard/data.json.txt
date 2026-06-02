@@ -1,0 +1,346 @@
+~[tlist_sql;
+-- ==============================================================================
+-- Student JSON Payload with Nested Historic Enrollments and Schedules
+-- ==============================================================================
+WITH selected_students AS (
+    -- Filters students based on active enrollments
+    SELECT DISTINCT 
+        students.id
+      , students.student_number
+      , students.dcid
+      , students.first_name
+      , students.last_name
+      , students.grade_level
+      , students.home_room
+      , students.schoolid
+    FROM students
+    WHERE students.STUDENT_NUMBER = 2030955
+)
+, enrollments AS (
+    SELECT 
+        students.student_number
+      , students.schoolid
+      , CASE 
+            WHEN students.schoolid = 1 THEN U_OODSCHOOL."NAME" 
+            ELSE schools.abbreviation 
+        END AS school_name
+      , students.grade_level
+      , students.entrydate
+      , students.exitdate
+      , fte.yearid
+    FROM students
+        INNER JOIN fte 
+            ON fte.id = students.fteid
+        INNER JOIN selected_students 
+            ON selected_students.student_number = students.STUDENT_NUMBER
+        INNER JOIN schools 
+            ON schools.school_number = students.schoolid
+        LEFT JOIN U_OODSCHOOL 
+            ON U_OODSCHOOL.SCHOOLID = students.track
+            
+    UNION
+      
+    SELECT 
+        students.student_number
+      , reenrollments.schoolid
+      , CASE 
+            WHEN reenrollments.schoolid = 1 THEN U_OODSCHOOL."NAME" 
+            ELSE schools.abbreviation 
+        END AS school_name
+      , reenrollments.grade_level
+      , reenrollments.entrydate
+      , reenrollments.exitdate
+      , fte.yearid
+    FROM reenrollments
+        INNER JOIN students 
+            ON students.id = reenrollments.studentid
+        INNER JOIN fte 
+            ON fte.id = reenrollments.fteid
+        INNER JOIN selected_students 
+            ON selected_students.student_number = students.STUDENT_NUMBER
+        INNER JOIN schools 
+            ON schools.school_number = reenrollments.schoolid
+        LEFT JOIN U_OODSCHOOL 
+            ON U_OODSCHOOL.SCHOOLID = students.track
+)
+, aggregated_enrollments AS (
+    -- We aggregate a basic list of historic enrollments into a JSON array grouped by student
+    SELECT 
+        enrollments.student_number
+      , JSON_ARRAYAGG(
+            JSON_OBJECT(
+                'grade_level' VALUE enrollments.grade_level
+              , 'schoolid'    VALUE enrollments.schoolid
+              , 'school_name' VALUE enrollments.school_name
+              , 'entrydate'   VALUE TO_CHAR(enrollments.entrydate, 'YYYY-MM-DD')
+              , 'exitdate'    VALUE TO_CHAR(enrollments.exitdate, 'YYYY-MM-DD')
+              , 'yearid'      VALUE enrollments.yearid
+              RETURNING CLOB
+            )
+            RETURNING CLOB
+        ) AS enrollment_json
+    FROM enrollments
+    GROUP BY 
+        enrollments.student_number
+)
+, schedules AS (
+    -- Pulls schedule records for the selected students
+    SELECT 
+        selected_students.student_number
+      , courses.course_name
+      , courses.course_number
+      , sections.section_number
+      , courses.credittype
+      , courses.sched_department
+      , cc.termid
+      , cc.dateenrolled
+      , cc.dateleft
+    FROM selected_students
+        INNER JOIN cc 
+            ON cc.studentid = selected_students.id
+            AND cc.schoolid = selected_students.schoolid
+        INNER JOIN sections 
+            ON sections.id = cc.sectionid
+        INNER JOIN courses 
+            ON courses.course_number = sections.course_number
+        LEFT JOIN (
+            SELECT st.sectionid, MIN(t.lastfirst) AS teacher_name
+            FROM sectionteacher st
+            INNER JOIN teachers t ON t.id = st.teacherid
+            GROUP BY st.sectionid
+        ) section_teacher ON section_teacher.sectionid = sections.id
+    -- You can add date or termid filters here if you only want the active schedule
+)
+, aggregated_schedules AS (
+    -- Aggregates the schedule records into a JSON array grouped by student
+    SELECT 
+        schedules.student_number
+      , JSON_ARRAYAGG(
+            JSON_OBJECT(
+                'course_name'       VALUE schedules.course_name
+              , 'course_number'      VALUE schedules.course_number
+              , 'section_number'     VALUE schedules.section_number
+              , 'credittype'         VALUE schedules.credittype
+              , 'sched_department'   VALUE schedules.sched_department
+              , 'termid'             VALUE schedules.termid
+              , 'dateenrolled'       VALUE TO_CHAR(schedules.dateenrolled, 'YYYY-MM-DD')
+              , 'dateleft'           VALUE TO_CHAR(schedules.dateleft, 'YYYY-MM-DD')
+              RETURNING CLOB
+            )
+            RETURNING CLOB
+        ) AS schedule_json
+    FROM schedules
+    GROUP BY 
+        schedules.student_number
+)
+, attendance_records AS (
+    -- Pulls a basic list of attendance records for the selected students across all years and schools
+    SELECT 
+        selected_students.student_number
+      , attendance.att_date
+      , schools.abbreviation AS attendance_school
+      , attendance_code.att_code
+      , attendance_code.description AS att_code_name
+    FROM selected_students
+        INNER JOIN attendance 
+            ON attendance.studentid = selected_students.id
+        INNER JOIN schools 
+            ON schools.school_number = attendance.schoolid
+        INNER JOIN attendance_code 
+            ON attendance_code.id = attendance.attendance_codeid
+            AND attendance_code.att_code != 'PHP'
+)
+, aggregated_attendance AS (
+    -- Aggregates the basic attendance records into a JSON array grouped by student
+    SELECT 
+        attendance_records.student_number
+      , JSON_ARRAYAGG(
+            JSON_OBJECT(
+                'att_date'          VALUE TO_CHAR(attendance_records.att_date, 'YYYY-MM-DD')
+              , 'attendance_school' VALUE attendance_records.attendance_school
+              , 'att_code'          VALUE attendance_records.att_code
+              , 'att_code_name'     VALUE attendance_records.att_code_name
+              RETURNING CLOB
+            )
+            RETURNING CLOB
+        ) AS attendance_json
+    FROM attendance_records
+    GROUP BY 
+        attendance_records.student_number
+)
+, benchmarks_raw AS (
+    -- Pulls benchmark scores for the selected student across all years and periods
+    SELECT
+        selected_students.student_number
+      , b.name                                                                                   AS benchmark
+      , b.template
+      , b.grade
+      , t.name
+            || CASE WHEN c.label IS NOT NULL THEN ' - ' || c.label ELSE '' END
+            || CASE WHEN COALESCE(c.label, '') = 'Accuracy' THEN ' ' || CHR(37) ELSE '' END      AS metric_name
+      , c.period
+      , c.period
+            || CASE
+                WHEN U_benchmark_period.showOnPortal != 1 AND '~(directory)' = 'admin'
+                THEN ' - Preview'
+                ELSE ''
+               END                                                                               AS period_label
+      , COALESCE(
+            CASE WHEN COALESCE(sC.target, c.target) = 'N/A' THEN 'N/A' ELSE NULL END
+          , APEX_JAVASCRIPT.ESCAPE(sC.score)
+          , '&nbsp;'
+        )                                                                                        AS score
+      , REPLACE(COALESCE(sC.target, c.target), CHR(37), '')                                     AS target
+      , RANK() OVER (PARTITION BY c.period ORDER BY t.orderBy)                                  AS row_number
+      , ROW_NUMBER() OVER (
+            PARTITION BY
+                selected_students.student_number
+              , b.name
+              , t.name || CASE WHEN c.label IS NOT NULL THEN ' - ' || c.label ELSE '' END
+            ORDER BY
+                SUBSTR(TO_CHAR(school_year.year - 1), 3, 4) || '-' || SUBSTR(TO_CHAR(school_year.year), 3, 4)
+              , selected_students.student_number
+              , b.name
+              , t.orderBy
+              , c.orderBy
+        )                                                                                        AS column_number
+      , SUBSTR(TO_CHAR(school_year.year - 1), 3, 4) || '-' || SUBSTR(TO_CHAR(school_year.year), 3, 4)
+                                                                                                AS year
+      , U_benchmark_period.orderby                                                              AS period_order
+      , TO_CHAR(t.id) || CASE WHEN c.label IS NOT NULL THEN '-' || standard_hash(c.label, 'MD5') ELSE '' END
+                                                                                                AS test_id
+      , c.red
+      , c.yellow
+      , c.green
+      , c.blue
+    FROM selected_students
+        INNER JOIN students s
+            ON s.dcid = selected_students.dcid
+        INNER JOIN TESD_CURRENT_YEAR ON 1 = 1
+        INNER JOIN U_benchmark b
+            ON b.id IS NOT NULL
+        INNER JOIN U_benchmark_test t
+            ON t.benchmarkID = b.id
+            AND COALESCE(t.active, 1) = 1
+        INNER JOIN U_benchmark_criteria c
+            ON c.testID = t.id
+
+        INNER JOIN U_benchmark_period
+            ON U_benchmark_period.name = c.period
+        LEFT JOIN U_benchmark_studentBenchmark sB
+            ON sB.studentsdcid = s.dcid
+            AND COALESCE(sB.deleted, 0) <> 1
+            AND sB.benchmarkID = b.id
+
+        LEFT JOIN U_benchmark_studentTest sT
+            ON sT.studentsdcid = s.dcid
+            AND COALESCE(sT.deleted, 0) <> 1
+            AND sT.testid = t.id
+        INNER JOIN U_benchmark_studentScore sC
+            ON sC.studentsdcid = s.dcid
+            AND COALESCE(sC.deleted, 0) <> 1
+            AND sC.criteriaID = c.id
+            AND sC.score IS NOT NULL
+        LEFT JOIN (
+            SELECT MAX(id) id, studentsdcid
+            FROM U_benchmark_studentScore
+            GROUP BY studentsdcid, criteriaid
+        ) sCmax
+            ON sCmax.id = sC.id
+            AND sCmax.studentsdcid = sC.studentsdcid
+        LEFT JOIN (
+            SELECT
+                terms.yearid
+              , terms.yearid + 1991                year
+              , MIN(terms.firstday)                firstday
+              , MAX(terms.lastday)                 lastday
+            FROM terms
+            WHERE terms.schoolid = 2080
+                AND terms.abbreviation LIKE '%-%'
+            GROUP BY terms.yearid
+        ) school_year
+            ON sC.WHENCREATED BETWEEN school_year.firstday AND school_year.lastday
+    WHERE COALESCE(sC.id, 0) = COALESCE(sCmax.id, 0)
+        AND (
+            (COALESCE(c.READINGSUPPORT, 0) = 1 AND sB.SUPPORTTYPE = 'R')
+            OR COALESCE(c.READINGSUPPORT, 0) <> 1
+        )
+)
+, aggregated_benchmarks AS (
+    SELECT
+        benchmarks_raw.student_number
+      , JSON_ARRAYAGG(
+            JSON_OBJECT(
+                'benchmark'     VALUE benchmarks_raw.benchmark
+              , 'template'      VALUE benchmarks_raw.template
+              , 'grade'         VALUE benchmarks_raw.grade
+              , 'metric_name'   VALUE benchmarks_raw.metric_name
+              , 'period'        VALUE benchmarks_raw.period
+              , 'period_label'  VALUE benchmarks_raw.period_label
+              , 'score'         VALUE benchmarks_raw.score
+              , 'target'        VALUE benchmarks_raw.target
+              , 'row_number'    VALUE benchmarks_raw.row_number
+              , 'column_number' VALUE benchmarks_raw.column_number
+              , 'year'          VALUE benchmarks_raw.year
+              , 'period_order'  VALUE benchmarks_raw.period_order
+              , 'test_id'       VALUE benchmarks_raw.test_id
+              , 'red'           VALUE benchmarks_raw.red
+              , 'yellow'        VALUE benchmarks_raw.yellow
+              , 'green'         VALUE benchmarks_raw.green
+              , 'blue'          VALUE benchmarks_raw.blue
+              RETURNING CLOB
+            )
+            RETURNING CLOB
+        ) AS benchmarks_json
+    FROM benchmarks_raw
+    GROUP BY benchmarks_raw.student_number
+)
+, student_json_payload AS (
+    -- Aggregates students and assigns the populated JSON elements
+    SELECT
+        JSON_ARRAYAGG(
+            JSON_OBJECT(
+                'student_dcid'                  VALUE TO_CHAR(selected_students.dcid)
+              , 'student_number'                VALUE selected_students.student_number
+              , 'first_name'                    VALUE selected_students.first_name
+              , 'last_name'                     VALUE selected_students.last_name
+              , 'grade_level'                   VALUE selected_students.grade_level
+              , 'home_room'                     VALUE selected_students.home_room
+              
+              -- Now populated dynamically via LEFT JOINs
+              , 'school_enrollment'             VALUE TREAT(aggregated_enrollments.enrollment_json AS JSON)
+              , 'student_schedule'              VALUE TREAT(aggregated_schedules.schedule_json AS JSON)
+              , 'attendance_records'            VALUE TREAT(aggregated_attendance.attendance_json AS JSON)
+              
+              -- Placeholders for remaining external system data
+              , 'discipline_records'            VALUE NULL
+              , 'benchmarks'                    VALUE TREAT(aggregated_benchmarks.benchmarks_json AS JSON)
+              , 'iready_benchmarks'             VALUE NULL
+              , 'acadience_reading_data'        VALUE NULL
+              , 'pssa_ela_math_scores'          VALUE NULL
+              , 'intervention_history'          VALUE NULL
+              , 'evaluation_special_ed_history' VALUE NULL
+              , 'eld_levels_access_scores'      VALUE NULL
+              , 'reading_inventories'           VALUE NULL
+              RETURNING CLOB
+            )
+            RETURNING CLOB
+        ) AS students_array
+    FROM selected_students
+        LEFT JOIN aggregated_enrollments 
+            ON aggregated_enrollments.student_number = selected_students.student_number
+        LEFT JOIN aggregated_schedules 
+            ON aggregated_schedules.student_number = selected_students.student_number
+        LEFT JOIN aggregated_attendance 
+            ON aggregated_attendance.student_number = selected_students.student_number
+        LEFT JOIN aggregated_benchmarks
+            ON aggregated_benchmarks.student_number = selected_students.student_number
+)
+-- Final Output
+SELECT
+    JSON_OBJECT(
+        'data' VALUE TREAT(COALESCE(student_json_payload.students_array, TO_CLOB(CHR(91) || CHR(93))) AS JSON)
+        RETURNING CLOB
+    ) AS full_json
+FROM student_json_payload;
+]~(json)[/tlist_sql]
