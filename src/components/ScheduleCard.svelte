@@ -1,12 +1,18 @@
 <script lang="ts">
-  import type { ScheduleCourse } from '$lib/data'
+  import type { ScheduleCourse, EnrollmentRecord } from '$lib/data'
   import { readStorage, writeStorage } from '$lib/utils/storage'
 
-  let { schedule, yearId, selectedYear = $bindable(yearId) } = $props<{
+  let { schedule, enrollment = [], yearId, selectedYear = $bindable(yearId) } = $props<{
     schedule: ScheduleCourse[]
+    enrollment?: EnrollmentRecord[]
     yearId: number
     selectedYear?: number
   }>()
+
+  // yearid → school_name lookup from enrollment history
+  const schoolByYear = $derived(
+    new Map(enrollment.map(e => [e.yearid, e.school_name]))
+  )
 
   const availableYears = $derived(
     [...new Set(schedule.map(c => Math.floor(c.termid / 100)))].sort((a, b) => a - b)
@@ -198,7 +204,7 @@
                   {/if}
                   {name}
                 </td>
-                <td class="school-cell">{rep?.school_name ?? '—'}</td>
+                <td class="school-cell">{rep ? (schoolByYear.get(Math.floor(rep.termid / 100)) ?? '—') : '—'}</td>
                 {#each pivot.years as year}
                   {@const section = pivot.cells.get(`${name}|${year}`)}
                   <td class="section-cell" class:selected-col={year === selectedYear}>

@@ -51,7 +51,7 @@
 
     <div class="bento-grid">
       <div class="col-span-2">
-        <ScheduleCard schedule={s.student_schedule ?? []} {yearId} bind:selectedYear />
+        <ScheduleCard schedule={s.student_schedule ?? []} enrollment={s.school_enrollment ?? []} {yearId} bind:selectedYear />
       </div>
 
       <AttendanceCard

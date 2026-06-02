@@ -92,7 +92,6 @@ WITH selected_students AS (
       , sections.section_number
       , courses.credittype
       , courses.sched_department
-      , schools.abbreviation AS school_name
       , cc.termid
       , cc.dateenrolled
       , cc.dateleft
@@ -105,8 +104,6 @@ WITH selected_students AS (
             ON sections.id = cc.sectionid
         INNER JOIN courses 
             ON courses.course_number = sections.course_number
-        INNER JOIN schools
-            ON schools.school_number = cc.schoolid
         LEFT JOIN (
             SELECT st.sectionid, MIN(t.lastfirst) AS teacher_name
             FROM sectionteacher st
@@ -126,7 +123,6 @@ WITH selected_students AS (
               , 'section_number'     VALUE schedules.section_number
               , 'credittype'         VALUE schedules.credittype
               , 'sched_department'   VALUE schedules.sched_department
-              , 'school_name'        VALUE schedules.school_name
               , 'termid'             VALUE schedules.termid
               , 'dateenrolled'       VALUE TO_CHAR(schedules.dateenrolled, 'YYYY-MM-DD')
               , 'dateleft'           VALUE TO_CHAR(schedules.dateleft, 'YYYY-MM-DD')

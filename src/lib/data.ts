@@ -28,7 +28,6 @@ export interface ScheduleCourse {
   credittype: string | null
   sched_department?: string | null
   teacher_name?: string | null
-  school_name?: string | null
   termid: number
   dateenrolled: string
   dateleft: string
