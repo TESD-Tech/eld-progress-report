@@ -111,7 +111,16 @@
       selectedDepts.has(c.sched_department)
     )
     const years = [...new Set(filtered.map(c => Math.floor(c.termid / 100)))].sort((a, b) => a - b)
-    const courseNames = [...new Set(filtered.map(c => c.course_name))].sort()
+    const courseFirstYear = new Map<string, number>()
+    for (const c of filtered) {
+      const yr = Math.floor(c.termid / 100)
+      const prev = courseFirstYear.get(c.course_name)
+      if (prev === undefined || yr < prev) courseFirstYear.set(c.course_name, yr)
+    }
+    const courseNames = [...new Set(filtered.map(c => c.course_name))].sort((a, b) => {
+      const yDiff = (courseFirstYear.get(a) ?? 0) - (courseFirstYear.get(b) ?? 0)
+      return yDiff !== 0 ? yDiff : a.localeCompare(b)
+    })
     // cell key: `courseName|yearId` → teacher_name
     const cells = new Map<string, string>()
     for (const c of filtered) {
