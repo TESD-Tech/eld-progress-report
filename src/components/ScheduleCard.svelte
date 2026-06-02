@@ -118,7 +118,7 @@
       if (prev === undefined || yr < prev) courseFirstYear.set(c.course_name, yr)
     }
     const courseNames = [...new Set(filtered.map(c => c.course_name))].sort((a, b) => {
-      const yDiff = (courseFirstYear.get(a) ?? 0) - (courseFirstYear.get(b) ?? 0)
+      const yDiff = (courseFirstYear.get(b) ?? 0) - (courseFirstYear.get(a) ?? 0)
       return yDiff !== 0 ? yDiff : a.localeCompare(b)
     })
     // cell key: `courseName|yearId` → teacher_name
