@@ -77,6 +77,10 @@
     return raw === '&nbsp;' || raw === '' ? '—' : raw
   }
 
+  function truncPeriod(p: string): string {
+    return p.length > 4 ? p.slice(0, 3) + '…' : p
+  }
+
   function scoreColor(
     raw: string,
     red: string | null, yellow: string | null,
@@ -180,7 +184,7 @@
             {#each pivot.columns as col}
               <th>
                 <span class="col-year">{col.year}</span>
-                <span class="col-period">{col.period}</span>
+                <span class="col-period">{truncPeriod(col.period)}</span>
               </th>
             {/each}
           </tr>
