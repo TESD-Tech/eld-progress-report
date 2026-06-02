@@ -125,14 +125,16 @@
       const hCells = headerTableEl!.querySelectorAll('th')
       hCells.forEach((th, i) => {
         const td = bCells[i] as HTMLElement | undefined
-        if (td) (th as HTMLElement).style.width = td.offsetWidth + 'px'
+        if (td) (th as HTMLElement).style.width = td.getBoundingClientRect().width + 'px'
       })
-      headerTableEl!.style.width = bodyTableEl!.offsetWidth + 'px'
+      headerTableEl!.style.width = bodyTableEl!.getBoundingClientRect().width + 'px'
     }
-    const frame = requestAnimationFrame(sync)
+    // Two rAFs: first lets Svelte flush DOM, second lets browser lay out
+    let frame2: number
+    const frame = requestAnimationFrame(() => { frame2 = requestAnimationFrame(sync) })
     const ro = new ResizeObserver(sync)
     ro.observe(bodyTableEl!)
-    return () => { cancelAnimationFrame(frame); ro.disconnect() }
+    return () => { cancelAnimationFrame(frame); cancelAnimationFrame(frame2); ro.disconnect() }
   })
 </script>
 
@@ -309,7 +311,7 @@
     table-layout: auto;
   }
 
-  .header-wrap .pivot-table { width: 100%; }
+  .header-wrap .pivot-table { width: 100%; table-layout: fixed; }
 
   .header-wrap th {
     text-align: center;
