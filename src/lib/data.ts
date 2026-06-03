@@ -1,6 +1,8 @@
 // Data types and loading for Student Dashboard.
 // Shape mirrors public/data.json (dev fixture) and the PS wildcard ./data.json (prod).
 
+import { loadInterventions, type InterventionRecord } from './interventionsApi'
+
 export interface BenchmarkRecord {
   benchmark: string
   template: string | null
@@ -54,7 +56,7 @@ export interface StudentInfo {
   benchmarks?: BenchmarkRecord[] | null
   acadience_reading_data?: unknown | null
   pssa_ela_math_scores?: unknown | null
-  intervention_history?: unknown | null
+  intervention_history?: InterventionRecord[] | null
   evaluation_special_ed_history?: unknown | null
   eld_levels_access_scores?: unknown | null
   reading_inventories?: unknown | null
@@ -75,17 +77,28 @@ export async function loadData(): Promise<DashboardData> {
   if (!r.ok) throw new Error(`Failed to fetch data: ${r.status} ${r.statusText}`)
   const raw = await r.json()
 
+  let dashboardData: DashboardData
+
   // Support { data: [...] } envelope — take the first student
   if (raw.data && Array.isArray(raw.data) && raw.data.length > 0) {
     const { data, ...rest } = raw
-    return { student: data[0] as StudentInfo, ...rest }
+    dashboardData = { student: data[0] as StudentInfo, ...rest }
+  } else if (raw.student) {
+    // Support { student: {...} } envelope directly
+    dashboardData = raw as DashboardData
+  } else {
+    // Bare object — treat as the student itself
+    dashboardData = { student: raw as StudentInfo }
   }
 
-  // Support { student: {...} } envelope directly
-  if (raw.student) return raw as DashboardData
+  // Enrich with intervention data from the external API.
+  // Only fetches if the PS wildcard left the field null/missing.
+  if (!dashboardData.student.intervention_history) {
+    dashboardData.student.intervention_history =
+      await loadInterventions(dashboardData.student.student_number)
+  }
 
-  // Bare object — treat as the student itself
-  return { student: raw as StudentInfo }
+  return dashboardData
 }
 
 /** Derive the current PS yearid from enrollment records (max yearid present). */

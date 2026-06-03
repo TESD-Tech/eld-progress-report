@@ -1,7 +1,4 @@
 ~[tlist_sql;
--- ==============================================================================
--- Student JSON Payload with Nested Historic Enrollments and Schedules
--- ==============================================================================
 WITH selected_students AS (
     -- Filters students based on active enrollments
     SELECT DISTINCT 
@@ -14,7 +11,7 @@ WITH selected_students AS (
       , students.home_room
       , students.schoolid
     FROM students
-    WHERE students.STUDENT_NUMBER = 2030955
+    WHERE students.STUDENT_NUMBER = ~(student_number)
 )
 , enrollments AS (
     SELECT 

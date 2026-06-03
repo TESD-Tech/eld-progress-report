@@ -8,6 +8,7 @@
   import EnrollmentCard from './components/EnrollmentCard.svelte'
   import PlaceholderCard from './components/PlaceholderCard.svelte'
   import BenchmarksCard from './components/BenchmarksCard.svelte'
+  import InterventionsCard from './components/InterventionsCard.svelte'
 
   let data = $state<DashboardData | null>(null)
   let loading = $state(true)
@@ -62,7 +63,11 @@
       <EnrollmentCard enrollment={s.school_enrollment ?? []} bind:highlightYear={selectedYear} />
 
       <PlaceholderCard title="Discipline Records" />
-      <PlaceholderCard title="Intervention History" />
+      {#if s.intervention_history?.length}
+        <InterventionsCard records={s.intervention_history} />
+      {:else}
+        <PlaceholderCard title="Intervention History" />
+      {/if}
       <div class="col-span-full">
         {#if s.benchmarks?.length}
           <BenchmarksCard records={s.benchmarks} />

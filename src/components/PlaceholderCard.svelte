@@ -7,7 +7,7 @@
     <h2>{title}</h2>
   </div>
   <div class="card-content">
-    <span class="pending">Data integration pending</span>
+    <span class="pending">No records available</span>
   </div>
 </section>
 

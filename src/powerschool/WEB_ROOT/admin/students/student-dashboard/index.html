@@ -19,6 +19,10 @@
 
   <student-dashboard-app></student-dashboard-app>
 
+  <!-- Interventions API credential — replace the empty string with the Bearer token.
+       This key is intentionally NOT in the JS bundle. Do not commit the actual value. -->
+  <script>window.__IS_API_KEY__ = 'ps-integration-key-88c9f2a4-56b1';</script>
+
   <script type="module">
     const isDev = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
     const path = isDev ? '/src/main.ts' : '/student-dashboard/app.js?v=~(random16)'

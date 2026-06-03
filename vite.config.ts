@@ -25,6 +25,18 @@ export default defineConfig({
   ],
   base: `/${projectName}/`,
   resolve: { alias: { '$lib': path.resolve(__dirname, 'src/lib') } },
+  server: {
+    proxy: {
+      // Proxy interventions API calls in dev to avoid CORS.
+      // The browser hits /interventions-proxy/... and Vite forwards it to is.tesd.net server-side.
+      '/interventions-proxy': {
+        target: 'https://is.tesd.net',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (p) => p.replace(/^\/interventions-proxy/, ''),
+      },
+    },
+  },
   build: {
     outDir: `dist/WEB_ROOT/${projectName}/`,
     rollupOptions: {
