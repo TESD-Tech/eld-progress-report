@@ -105,7 +105,10 @@ export async function loadData(): Promise<DashboardData> {
   // Always fetch both — dev uses public/intervention.json + public/pairs.json.
   const [interventions, pairs] = await Promise.all([
     import.meta.env.DEV
-      ? fetch(`${import.meta.env.BASE_URL}intervention.json`).then(r => r.ok ? r.json() : null).catch(() => null)
+    ? fetch(`${import.meta.env.BASE_URL}intervention.json`)
+        .then(r => r.ok ? r.json() : null)
+        .then(j => j ? (Array.isArray(j) ? j : (j.data ?? null)) : null)
+        .catch(() => null)
       : loadInterventions(dashboardData.student.student_number),
     loadPairsSummary(dashboardData.student.student_number),
   ])
