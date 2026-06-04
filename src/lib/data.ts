@@ -67,7 +67,7 @@ export interface StudentInfo {
   intervention_history?: InterventionRecord[] | null
   evaluation_special_ed_history?: unknown | null
   eld_levels_access_scores?: unknown | null
-  reading_inventories?: PairsSummary | null
+  pairs?: PairsSummary | null
 }
 
 export interface DashboardData {
@@ -107,7 +107,7 @@ export async function loadData(): Promise<DashboardData> {
       loadPairsSummary(dashboardData.student.student_number),
     ])
     dashboardData.student.intervention_history = interventions
-    dashboardData.student.reading_inventories = pairs
+    dashboardData.student.pairs = pairs
   }
 
   return dashboardData
