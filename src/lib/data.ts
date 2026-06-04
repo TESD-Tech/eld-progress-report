@@ -2,6 +2,7 @@
 // Shape mirrors public/data.json (dev fixture) and the PS wildcard ./data.json (prod).
 
 import { loadInterventions, type InterventionRecord } from './interventionsApi'
+import { loadPairsSummary, type PairsSummary } from './pairsApi'
 
 export interface TestScoreRecord {
   test: string
@@ -66,7 +67,7 @@ export interface StudentInfo {
   intervention_history?: InterventionRecord[] | null
   evaluation_special_ed_history?: unknown | null
   eld_levels_access_scores?: unknown | null
-  reading_inventories?: unknown | null
+  reading_inventories?: PairsSummary | null
 }
 
 export interface DashboardData {
@@ -101,8 +102,12 @@ export async function loadData(): Promise<DashboardData> {
   // In dev, use whatever is in public/data.json — no API call.
   // In prod, enrich with live intervention data if the wildcard left it null.
   if (!import.meta.env.DEV && !dashboardData.student.intervention_history) {
-    dashboardData.student.intervention_history =
-      await loadInterventions(dashboardData.student.student_number)
+    const [interventions, pairs] = await Promise.all([
+      loadInterventions(dashboardData.student.student_number),
+      loadPairsSummary(dashboardData.student.student_number),
+    ])
+    dashboardData.student.intervention_history = interventions
+    dashboardData.student.reading_inventories = pairs
   }
 
   return dashboardData
