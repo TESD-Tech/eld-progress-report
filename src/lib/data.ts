@@ -101,12 +101,15 @@ export async function loadData(): Promise<DashboardData> {
 
   // In dev, use whatever is in public/data.json — no API call.
   // In prod, enrich with live intervention data if the wildcard left it null.
-  if (!import.meta.env.DEV && !dashboardData.student.intervention_history) {
+  // Interventions and PAIRS come from the IS API in prod, or local fixtures in dev.
+  // Always fetch both — dev uses public/pairs.json, prod uses the live API.
+  if (import.meta.env.DEV || !dashboardData.student.intervention_history) {
     const [interventions, pairs] = await Promise.all([
-      loadInterventions(dashboardData.student.student_number),
+      import.meta.env.DEV ? Promise.resolve(dashboardData.student.intervention_history ?? null)
+                          : loadInterventions(dashboardData.student.student_number),
       loadPairsSummary(dashboardData.student.student_number),
     ])
-    dashboardData.student.intervention_history = interventions
+    if (!import.meta.env.DEV) dashboardData.student.intervention_history = interventions
     dashboardData.student.pairs = pairs
   }
 

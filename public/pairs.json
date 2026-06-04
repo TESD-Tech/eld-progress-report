@@ -1,0 +1,938 @@
+[
+  {
+    "success": true,
+    "data": {
+      "student_id": "S_2025531",
+      "assessments": [
+        {
+          "id": 1901359,
+          "date": "2015-09-16T04:00:00.000Z",
+          "grade": "01",
+          "assessment_name": "Reading Screening - Grade 1",
+          "season": null,
+          "results": [
+            {
+              "area": "Early Literacy Assessment",
+              "criteria": "Upper Case",
+              "result": "25",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Early Literacy Assessment",
+              "criteria": "Lower Case",
+              "result": "24",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Early Literacy Assessment",
+              "criteria": "Letter Sounds",
+              "result": "18",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Early Literacy Assessment",
+              "criteria": "Sight Vocabulary",
+              "result": "11",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Early Literacy Assessment",
+              "criteria": "Dictation Test",
+              "result": "27",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Early Literacy Assessment",
+              "criteria": "Total",
+              "result": "105",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Phonological Awareness",
+              "criteria": "Rhyme",
+              "result": "8",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Phonological Awareness",
+              "criteria": "Beginning Sounds",
+              "result": "0",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Phonological Awareness",
+              "criteria": "Blend Onsets And Rime",
+              "result": "8",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Phonological Awareness",
+              "criteria": "Segmenting Onsets and Rimes",
+              "result": "0",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Phonological Awareness",
+              "criteria": "Phoneme Blending",
+              "result": "6",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Phonological Awareness",
+              "criteria": "Phoneme Segmentation",
+              "result": "5",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Phonological Awareness",
+              "criteria": "Total",
+              "result": "27",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Other",
+              "criteria": "TAAS / PASP",
+              "result": "2",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Other",
+              "criteria": "DOLCH",
+              "result": "6",
+              "answered": null,
+              "descriptor": ""
+            }
+          ]
+        },
+        {
+          "id": 1901821,
+          "date": "2015-11-12T05:00:00.000Z",
+          "grade": "01",
+          "assessment_name": "Reading Screening - Grade 1",
+          "season": null,
+          "results": [
+            {
+              "area": "Early Literacy Assessment",
+              "criteria": "Upper Case",
+              "result": "26",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Early Literacy Assessment",
+              "criteria": "Lower Case",
+              "result": "26",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Early Literacy Assessment",
+              "criteria": "Letter Sounds",
+              "result": "21",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Early Literacy Assessment",
+              "criteria": "Sight Vocabulary",
+              "result": "10",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Early Literacy Assessment",
+              "criteria": "Dictation Test",
+              "result": "",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Early Literacy Assessment",
+              "criteria": "Total",
+              "result": "",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Phonological Awareness",
+              "criteria": "Rhyme",
+              "result": "",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Phonological Awareness",
+              "criteria": "Beginning Sounds",
+              "result": "",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Phonological Awareness",
+              "criteria": "Blend Onsets And Rime",
+              "result": "",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Phonological Awareness",
+              "criteria": "Segmenting Onsets and Rimes",
+              "result": "",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Phonological Awareness",
+              "criteria": "Phoneme Blending",
+              "result": "",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Phonological Awareness",
+              "criteria": "Phoneme Segmentation",
+              "result": "",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Phonological Awareness",
+              "criteria": "Total",
+              "result": "",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Other",
+              "criteria": "TAAS / PASP",
+              "result": "1",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Other",
+              "criteria": "DOLCH",
+              "result": "",
+              "answered": null,
+              "descriptor": ""
+            }
+          ]
+        },
+        {
+          "id": 1902195,
+          "date": "2016-01-14T05:00:00.000Z",
+          "grade": "01",
+          "assessment_name": "Reading Screening - Grade 1",
+          "season": null,
+          "results": [
+            {
+              "area": "Early Literacy Assessment",
+              "criteria": "Upper Case",
+              "result": "26",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Early Literacy Assessment",
+              "criteria": "Lower Case",
+              "result": "25",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Early Literacy Assessment",
+              "criteria": "Letter Sounds",
+              "result": "24",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Early Literacy Assessment",
+              "criteria": "Sight Vocabulary",
+              "result": "17",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Early Literacy Assessment",
+              "criteria": "Dictation Test",
+              "result": "28",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Early Literacy Assessment",
+              "criteria": "Total",
+              "result": "120",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Phonological Awareness",
+              "criteria": "Rhyme",
+              "result": "8",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Phonological Awareness",
+              "criteria": "Beginning Sounds",
+              "result": "8",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Phonological Awareness",
+              "criteria": "Blend Onsets And Rime",
+              "result": "8",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Phonological Awareness",
+              "criteria": "Segmenting Onsets and Rimes",
+              "result": "6",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Phonological Awareness",
+              "criteria": "Phoneme Blending",
+              "result": "8",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Phonological Awareness",
+              "criteria": "Phoneme Segmentation",
+              "result": "8",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Phonological Awareness",
+              "criteria": "Total",
+              "result": "",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Other",
+              "criteria": "TAAS / PASP",
+              "result": "8",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "Other",
+              "criteria": "DOLCH",
+              "result": "",
+              "answered": null,
+              "descriptor": ""
+            }
+          ]
+        },
+        {
+          "id": 1908310,
+          "date": "2017-02-17T05:00:00.000Z",
+          "grade": "03",
+          "assessment_name": "Reading IRI",
+          "season": null,
+          "results": [
+            {
+              "area": "PP1",
+              "criteria": "Flash",
+              "result": "88",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "PP1",
+              "criteria": "Untimed",
+              "result": "100",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "PP1",
+              "criteria": "Context",
+              "result": "91",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "PP1",
+              "criteria": "Oral",
+              "result": "70",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "PP1",
+              "criteria": "Silent",
+              "result": "-",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "PP1",
+              "criteria": "Average",
+              "result": "-",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "PP2",
+              "criteria": "Flash",
+              "result": "25",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "PP2",
+              "criteria": "Untimed",
+              "result": "45",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "PP2",
+              "criteria": "Context",
+              "result": "88-",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "PP2",
+              "criteria": "Oral",
+              "result": "20",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "PP2",
+              "criteria": "Silent",
+              "result": "-",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "PP2",
+              "criteria": "Average",
+              "result": "-",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "PP3",
+              "criteria": "Flash",
+              "result": "",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "PP3",
+              "criteria": "Untimed",
+              "result": "25",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "PP3",
+              "criteria": "Context",
+              "result": "45",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "PP3",
+              "criteria": "Oral",
+              "result": "",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "PP3",
+              "criteria": "Silent",
+              "result": "",
+              "answered": null,
+              "descriptor": ""
+            },
+            {
+              "area": "PP3",
+              "criteria": "Average",
+              "result": "",
+              "answered": null,
+              "descriptor": ""
+            }
+          ]
+        },
+        {
+          "id": 1908312,
+          "date": "2018-05-03T04:00:00.000Z",
+          "grade": "03",
+          "assessment_name": "Reading IRI",
+          "season": null,
+          "results": [
+            {
+              "area": "PP",
+              "criteria": "Flash",
+              "result": "90",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "PP",
+              "criteria": "Untimed",
+              "result": "100",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "PP",
+              "criteria": "Context",
+              "result": null,
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "PP",
+              "criteria": "Oral",
+              "result": null,
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "PP",
+              "criteria": "Silent",
+              "result": null,
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "PP",
+              "criteria": "Average",
+              "result": null,
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "P",
+              "criteria": "Flash",
+              "result": "85",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "P",
+              "criteria": "Untimed",
+              "result": "100",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "P",
+              "criteria": "Context",
+              "result": null,
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "P",
+              "criteria": "Oral",
+              "result": null,
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "P",
+              "criteria": "Silent",
+              "result": null,
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "P",
+              "criteria": "Average",
+              "result": null,
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "1",
+              "criteria": "Flash",
+              "result": "70",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "1",
+              "criteria": "Untimed",
+              "result": "85",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "1",
+              "criteria": "Context",
+              "result": "93-",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "1",
+              "criteria": "Oral",
+              "result": "94",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "1",
+              "criteria": "Silent",
+              "result": "100",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "1",
+              "criteria": "Average",
+              "result": "97",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "2",
+              "criteria": "Flash",
+              "result": "55",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "2",
+              "criteria": "Untimed",
+              "result": "75",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "2",
+              "criteria": "Context",
+              "result": "92-",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "2",
+              "criteria": "Oral",
+              "result": "60",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "2",
+              "criteria": "Silent",
+              "result": "-",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "2",
+              "criteria": "Average",
+              "result": "-",
+              "answered": null,
+              "descriptor": null
+            }
+          ]
+        },
+        {
+          "id": 1915395,
+          "date": "2026-03-10T04:00:00.000Z",
+          "grade": "11",
+          "assessment_name": "Reading IRI",
+          "season": null,
+          "results": [
+            {
+              "area": "5",
+              "criteria": "Flash",
+              "result": "90%",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "5",
+              "criteria": "Untimed",
+              "result": null,
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "5",
+              "criteria": "Context",
+              "result": null,
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "5",
+              "criteria": "Oral",
+              "result": null,
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "5",
+              "criteria": "Silent",
+              "result": null,
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "5",
+              "criteria": "Average",
+              "result": null,
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "6",
+              "criteria": "Flash",
+              "result": "90%",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "6",
+              "criteria": "Untimed",
+              "result": "100%",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "6",
+              "criteria": "Context",
+              "result": null,
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "6",
+              "criteria": "Oral",
+              "result": null,
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "6",
+              "criteria": "Silent",
+              "result": null,
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "6",
+              "criteria": "Average",
+              "result": null,
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "7",
+              "criteria": "Flash",
+              "result": "85%",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "7",
+              "criteria": "Untimed",
+              "result": "90%",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "7",
+              "criteria": "Context",
+              "result": null,
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "7",
+              "criteria": "Oral",
+              "result": null,
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "7",
+              "criteria": "Silent",
+              "result": null,
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "7",
+              "criteria": "Average",
+              "result": null,
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "8",
+              "criteria": "Flash",
+              "result": "85%",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "8",
+              "criteria": "Untimed",
+              "result": "90%",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "8",
+              "criteria": "Context",
+              "result": null,
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "8",
+              "criteria": "Oral",
+              "result": null,
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "8",
+              "criteria": "Silent",
+              "result": null,
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "8",
+              "criteria": "Average",
+              "result": null,
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "9",
+              "criteria": "Flash",
+              "result": "80%",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "9",
+              "criteria": "Untimed",
+              "result": "85%",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "9",
+              "criteria": "Context",
+              "result": "99%",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "9",
+              "criteria": "Oral",
+              "result": "80%",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "9",
+              "criteria": "Silent",
+              "result": "80%/90% with look back",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "9",
+              "criteria": "Average",
+              "result": "80%",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "10",
+              "criteria": "Flash",
+              "result": "50%",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "10",
+              "criteria": "Untimed",
+              "result": "55%",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "10",
+              "criteria": "Context",
+              "result": "99%",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "10",
+              "criteria": "Oral",
+              "result": "80%",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "10",
+              "criteria": "Silent",
+              "result": "65%/85% with look back",
+              "answered": null,
+              "descriptor": null
+            },
+            {
+              "area": "10",
+              "criteria": "Average",
+              "result": "72%",
+              "answered": null,
+              "descriptor": null
+            }
+          ]
+        }
+      ],
+      "interventions": [
+        {
+          "student_intervention_id": 43028,
+          "startDate": "2015-10-02T04:00:00.000Z",
+          "endDate": "2016-03-07T05:00:00.000Z",
+          "readingLevel": "",
+          "attended": false,
+          "goal": "",
+          "comments": "",
+          "intervention_name": "Tier 3 Intervention",
+          "year": 2016
+        }
+      ]
+    }
+  }
+]
