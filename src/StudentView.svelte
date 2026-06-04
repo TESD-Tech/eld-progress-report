@@ -10,6 +10,7 @@
   import BenchmarksCard from './components/BenchmarksCard.svelte'
   import InterventionsCard from './components/InterventionsCard.svelte'
   import TestScoresCard from './components/TestScoresCard.svelte'
+  import PairsCard from './components/PairsCard.svelte'
 
   let data = $state<DashboardData | null>(null)
   let loading = $state(true)
@@ -84,6 +85,11 @@
           <InterventionsCard records={s.intervention_history} />
         {:else}
           <PlaceholderCard title="Intervention History" />
+        {/if}
+        {#if s.pairs}
+          <PairsCard data={s.pairs} />
+        {:else}
+          <PlaceholderCard title="PAIRS Reading" />
         {/if}
       </div>
     </div>

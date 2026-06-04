@@ -7,8 +7,51 @@
 
 import { getAccessToken } from './auth'
 
-// Flexible shape — tighten once the live response structure is confirmed.
-export type PairsSummary = Record<string, unknown> | unknown[]
+export interface PairsResult {
+  area: string
+  criteria: string
+  result: string | null
+  answered: string | null
+  descriptor: string | null
+}
+
+export interface PairsAssessment {
+  id: number
+  date: string
+  grade: string
+  assessment_name: string
+  season: string | null
+  results: PairsResult[]
+}
+
+export interface PairsIntervention {
+  student_intervention_id: number
+  startDate: string
+  endDate: string | null
+  readingLevel: string
+  attended: boolean
+  goal: string
+  comments: string
+  intervention_name: string
+  year: number
+}
+
+export interface PairsSummary {
+  student_id: string
+  assessments: PairsAssessment[]
+  interventions: PairsIntervention[]
+}
+
+// Unwrap API envelope: [{success, data}] or {success, data} or raw PairsSummary
+function unwrap(json: unknown): PairsSummary | null {
+  if (!json) return null
+  if (Array.isArray(json)) {
+    const first = json[0]
+    return first?.data ?? null
+  }
+  const obj = json as Record<string, unknown>
+  return (obj.data as PairsSummary) ?? (obj as PairsSummary) ?? null
+}
 
 const IS_API_BASE_URL = import.meta.env.VITE_IS_API_URL ?? 'https://is.tesd.net'
 
@@ -25,7 +68,8 @@ export async function loadPairsSummary(
     try {
       const r = await fetch(`${import.meta.env.BASE_URL}pairs.json`)
       if (!r.ok) return null
-      return await r.json()
+      const json = await r.json()
+      return unwrap(json)
     } catch {
       return null
     }
@@ -46,7 +90,7 @@ export async function loadPairsSummary(
       console.warn(`[pairsApi] Request failed: ${response.status} ${response.statusText}`)
       return null
     }
-    return await response.json()
+    return unwrap(await response.json())
   } catch (err) {
     console.warn('[pairsApi] Fetch error:', err)
     return null
