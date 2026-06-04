@@ -3,7 +3,7 @@
     {
       "htmlID": "navTEStudentDashboard",
       "title": "Student Dashboard",
-      "version": "26.06.04",
+      "version": "26.06.14",
       "contextType": "student",
       "requiredContext": "student",
       "sortOrder": 50,

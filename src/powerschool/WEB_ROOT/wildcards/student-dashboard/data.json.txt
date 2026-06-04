@@ -263,6 +263,35 @@ WITH selected_students AS (
             OR COALESCE(c.READINGSUPPORT, 0) <> 1
         )
 )
+, test_scores_raw AS (
+    SELECT
+        selected_students.student_number
+      , U_STUDENTTESTSCORES.TEST
+      , U_STUDENTTESTSCORES."YEAR"
+      , U_STUDENTTESTSCORES.SCALE_SCORE
+      , U_STUDENTTESTSCORES.ACHIEVEMENT_LEVEL
+    FROM U_STUDENTTESTSCORES
+        INNER JOIN students
+            ON students.dcid = U_STUDENTTESTSCORES.STUDENTSDCID
+        INNER JOIN selected_students
+            ON selected_students.student_number = students.student_number
+)
+, aggregated_test_scores AS (
+    SELECT
+        test_scores_raw.student_number
+      , JSON_ARRAYAGG(
+            JSON_OBJECT(
+                'test'              VALUE test_scores_raw.TEST
+              , 'year'              VALUE test_scores_raw."YEAR"
+              , 'scale_score'       VALUE test_scores_raw.SCALE_SCORE
+              , 'achievement_level' VALUE test_scores_raw.ACHIEVEMENT_LEVEL
+              RETURNING CLOB
+            )
+            RETURNING CLOB
+        ) AS test_scores_json
+    FROM test_scores_raw
+    GROUP BY test_scores_raw.student_number
+)
 , aggregated_benchmarks AS (
     SELECT
         benchmarks_raw.student_number
@@ -312,9 +341,7 @@ WITH selected_students AS (
               -- Placeholders for remaining external system data
               , 'discipline_records'            VALUE NULL
               , 'benchmarks'                    VALUE TREAT(aggregated_benchmarks.benchmarks_json AS JSON)
-              , 'iready_benchmarks'             VALUE NULL
-              , 'acadience_reading_data'        VALUE NULL
-              , 'pssa_ela_math_scores'          VALUE NULL
+              , 'test_scores'                   VALUE TREAT(aggregated_test_scores.test_scores_json AS JSON)
               , 'intervention_history'          VALUE NULL
               , 'evaluation_special_ed_history' VALUE NULL
               , 'eld_levels_access_scores'      VALUE NULL
@@ -330,6 +357,8 @@ WITH selected_students AS (
             ON aggregated_schedules.student_number = selected_students.student_number
         LEFT JOIN aggregated_attendance 
             ON aggregated_attendance.student_number = selected_students.student_number
+        LEFT JOIN aggregated_test_scores
+            ON aggregated_test_scores.student_number = selected_students.student_number
         LEFT JOIN aggregated_benchmarks
             ON aggregated_benchmarks.student_number = selected_students.student_number
 )

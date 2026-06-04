@@ -1,6 +1,6 @@
 {
   "name": "student-dashboard",
-  "version": "26.06.04",
+  "version": "26.06.14",
   "type": "module",
   "description": "Student Dashboard PowerSchool plugin",
   "scripts": {

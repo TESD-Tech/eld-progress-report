@@ -2,11 +2,12 @@
   import type { ScheduleCourse, EnrollmentRecord } from '$lib/data'
   import { readStorage, writeStorage } from '$lib/utils/storage'
 
-  let { schedule, enrollment = [], yearId, selectedYear = $bindable(yearId) } = $props<{
+  let { schedule, enrollment = [], yearId, selectedYear = $bindable(yearId), gradeLevel = 0 } = $props<{
     schedule: ScheduleCourse[]
     enrollment?: EnrollmentRecord[]
     yearId: number
     selectedYear?: number
+    gradeLevel?: number
   }>()
 
   // yearid → school_name lookup from enrollment history
@@ -70,7 +71,9 @@
     )
   )
 
-  // Unique dept codes present this year, sorted; null means no dept assigned
+  const isElementary = $derived(gradeLevel < 5)
+
+  // Unique dept codes present this year, sorted; for elementary, null dept courses show under "All"
   const depts = $derived(
     [...new Set(yearCourses.map(c => c.sched_department).filter((d): d is string => d != null))].sort()
   )
@@ -96,10 +99,20 @@
     writeStorage('schedule-depts', '[]')
   }
 
+  // Reset selectedDepts to only include departments that exist for this student/year.
+  // Prevents stale localStorage selections from hiding all tiles on a new student.
+  $effect(() => {
+    const valid = new Set([...selectedDepts].filter(d => depts.includes(d)))
+    if (valid.size !== selectedDepts.size) {
+      selectedDepts = valid
+      writeStorage('schedule-depts', JSON.stringify([...valid]))
+    }
+  })
+
   // Filter then sort: dept alphabetically (null last), then course name
   const courses = $derived(
     (selectedDepts.size === 0
-      ? yearCourses
+      ? yearCourses.filter(c => isElementary || c.sched_department != null)
       : yearCourses.filter(c => c.sched_department != null && selectedDepts.has(c.sched_department))
     ).sort((a, b) => {
       const da = a.sched_department ?? '\uFFFF'

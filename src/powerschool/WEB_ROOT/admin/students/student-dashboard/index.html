@@ -19,9 +19,9 @@
 
   <student-dashboard-app></student-dashboard-app>
 
-  <!-- Interventions API credential — replace the empty string with the Bearer token.
-       This key is intentionally NOT in the JS bundle. Do not commit the actual value. -->
-  <script>window.__IS_API_KEY__ = 'ps-integration-key-88c9f2a4-56b1';</script>
+  <!-- PS session token injected server-side via tlist_sql.
+       Using a data attribute avoids JS string escaping issues with the PSID value. -->
+  <meta name="ps-session-token" content="~[tlist_sql;SELECT PSID FROM LOGINS WHERE USERID = ~[x:userid] ORDER BY LOGINDATE DESC FETCH FIRST 1 ROWS ONLY;]~(psid)[/tlist_sql]">
 
   <script type="module">
     const isDev = location.hostname === 'localhost' || location.hostname === '127.0.0.1'

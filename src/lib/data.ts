@@ -3,6 +3,13 @@
 
 import { loadInterventions, type InterventionRecord } from './interventionsApi'
 
+export interface TestScoreRecord {
+  test: string
+  year: number
+  scale_score: number | null
+  achievement_level: string | null
+}
+
 export interface BenchmarkRecord {
   benchmark: string
   template: string | null
@@ -54,8 +61,8 @@ export interface StudentInfo {
   attendance_records?: AttendanceRecord[]
   discipline_records?: unknown | null
   benchmarks?: BenchmarkRecord[] | null
+  test_scores?: TestScoreRecord[] | null
   acadience_reading_data?: unknown | null
-  pssa_ela_math_scores?: unknown | null
   intervention_history?: InterventionRecord[] | null
   evaluation_special_ed_history?: unknown | null
   eld_levels_access_scores?: unknown | null
@@ -91,9 +98,9 @@ export async function loadData(): Promise<DashboardData> {
     dashboardData = { student: raw as StudentInfo }
   }
 
-  // Enrich with intervention data from the external API.
-  // Only fetches if the PS wildcard left the field null/missing.
-  if (!dashboardData.student.intervention_history) {
+  // In dev, use whatever is in public/data.json — no API call.
+  // In prod, enrich with live intervention data if the wildcard left it null.
+  if (!import.meta.env.DEV && !dashboardData.student.intervention_history) {
     dashboardData.student.intervention_history =
       await loadInterventions(dashboardData.student.student_number)
   }

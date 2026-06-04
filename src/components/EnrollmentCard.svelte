@@ -9,6 +9,12 @@
   const sorted = $derived(
     enrollment.slice().sort((a, b) => b.yearid - a.yearid)
   )
+
+  function gradeLabel(g: number): string {
+    if (g === -1) return 'Pre-K'
+    if (g === 0)  return 'KG'
+    return `Grade ${g}`
+  }
 </script>
 
 <section class="card">
@@ -36,7 +42,7 @@
             <div class="dot"></div>
             <div class="details">
               <strong>{enr.school_name}</strong>
-              <span>Grade {enr.grade_level} · {enr.entrydate.substring(0, 4)}–{enr.exitdate.substring(0, 4)}</span>
+              <span>{gradeLabel(enr.grade_level)} · {enr.entrydate.substring(0, 4)}–{enr.exitdate.substring(0, 4)}</span>
             </div>
           </div>
         {/each}
@@ -54,6 +60,8 @@
     border: 1px solid #f3f4f6;
     box-shadow: 0 4px 15px rgba(0,0,0,0.03);
     overflow: hidden;
+    height: 100%;
+    box-sizing: border-box;
   }
 
   .card-header {

@@ -9,6 +9,7 @@
   import PlaceholderCard from './components/PlaceholderCard.svelte'
   import BenchmarksCard from './components/BenchmarksCard.svelte'
   import InterventionsCard from './components/InterventionsCard.svelte'
+  import TestScoresCard from './components/TestScoresCard.svelte'
 
   let data = $state<DashboardData | null>(null)
   let loading = $state(true)
@@ -48,26 +49,26 @@
   {:else if data?.student}
     {@const s = data.student}
 
-    <StudentHeader student={s} />
+    {#if import.meta.env.DEV}
+      <StudentHeader student={s} />
+    {/if}
 
     <div class="bento-grid">
       <div class="col-span-2">
-        <ScheduleCard schedule={s.student_schedule ?? []} enrollment={s.school_enrollment ?? []} {yearId} bind:selectedYear />
+        <ScheduleCard schedule={s.student_schedule ?? []} enrollment={s.school_enrollment ?? []} {yearId} gradeLevel={s.grade_level} bind:selectedYear />
       </div>
 
-      <AttendanceCard
-        records={s.attendance_records ?? []}
-        {yearStart}
-      />
+      <div class="row-span-2">
+        <EnrollmentCard enrollment={s.school_enrollment ?? []} bind:highlightYear={selectedYear} />
+      </div>
 
-      <EnrollmentCard enrollment={s.school_enrollment ?? []} bind:highlightYear={selectedYear} />
+      <div class="col-span-2">
+        <AttendanceCard
+          records={s.attendance_records ?? []}
+          {selectedYear}
+        />
+      </div>
 
-      <PlaceholderCard title="Discipline Records" />
-      {#if s.intervention_history?.length}
-        <InterventionsCard records={s.intervention_history} />
-      {:else}
-        <PlaceholderCard title="Intervention History" />
-      {/if}
       <div class="col-span-full">
         {#if s.benchmarks?.length}
           <BenchmarksCard records={s.benchmarks} />
@@ -75,7 +76,16 @@
           <PlaceholderCard title="Benchmarks" />
         {/if}
       </div>
-      <PlaceholderCard title="PSSA Scores" />
+
+      <TestScoresCard scores={s.test_scores} />
+      <div class="side-stack">
+        <PlaceholderCard title="Discipline Records" />
+        {#if s.intervention_history?.length}
+          <InterventionsCard records={s.intervention_history} />
+        {:else}
+          <PlaceholderCard title="Intervention History" />
+        {/if}
+      </div>
     </div>
 
     {#if import.meta.env.DEV}
@@ -144,8 +154,17 @@
   }
 
   @media (min-width: 1024px) {
-    .col-span-2    { grid-column: span 2; }
-    .col-span-full { grid-column: 1 / -1; }
+    .bento-grid   { grid-template-columns: 1fr 1fr 1fr; }
+    .col-span-2   { grid-column: span 2; }
+    .col-span-full{ grid-column: 1 / -1; }
+    .row-span-2   { grid-row: span 2; align-self: stretch; }
+    .row-span-2 > :global(*) { height: 100%; }
+  }
+
+  .side-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
   }
 
   .debug {
