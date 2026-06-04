@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<psExtension xmlns="http://www.powerschool.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.powerschool.com psextension.xsd">
+	<extensionname>U_StudentDashboard</extensionname>
+	<extendedTable coreTable="Students" dbTableName="U_StudentTestScores" childName="U_StudentTestScores" comment="Custom test score records linked to students">
+		<field name="Test" type="String" length="200"/>
+		<field name="Year" type="Integer"/>
+		<field name="Scale_Score" type="Integer"/>
+		<field name="Achievement_Level" type="String" length="100"/>
+	</extendedTable>
+</psExtension>
